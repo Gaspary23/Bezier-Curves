@@ -23,14 +23,10 @@ using namespace std;
 #endif
 
 #ifdef __linux__
-#include <glut.h>
+#include <GL/glut.h>
 #endif
 
-enum Cores {
-    Black, White,
-    Gray,
-    Yellow,
-    Red,Green, Blue,
+enum {
     Aquamarine,
     BlueViolet,
     Brown,
@@ -124,7 +120,10 @@ enum Cores {
     Med_Purple,
     Light_Purple,
     Very_Light_Purple,
-    LAST_COLOR
+    Yellow,
+    Green,
+    Black,
+    DarkYellow
 };
 
 
