@@ -49,15 +49,15 @@ Temporizador T2;
 
 InstanciaBZ Personagens[10];
 
-Bezier Curvas[20];
 unsigned int nCurvas;
+Bezier Curvas[20];
 
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
 
 bool desenha = false;
 
-Poligono Mapa, MeiaSeta, Mastro;
+Poligono Mapa, MeiaSeta, Mastro, PontosDeControle, auxCurvas;
 int nInstancias=0;
 
 float angulo=0.0;
@@ -85,9 +85,9 @@ void animate()
     }
     if (TempoTotal > 5.0)
     {
-        cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
-        cout << "Nros de Frames sem desenho: " << nFrames << endl;
-        cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
+        //cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
+        //cout << "Nros de Frames sem desenho: " << nFrames << endl;
+        //cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
         TempoTotal = 0;
         nFrames = 0;
     }
@@ -186,22 +186,22 @@ void DesenhaCatavento()
     glPopMatrix();
 }
 // **********************************************************************
-// Esta fun��o deve instanciar todos os personagens do cen�rio
+// Esta funcao deve instanciar todos os personagens do cenario
 // **********************************************************************
 void CriaInstancias()
 {
     Personagens[0].Posicao = Ponto (0,0);
     Personagens[0].Rotacao = 0;
-    Personagens[0].modelo = DesenhaCatavento;
+    Personagens[0].modelo = DesenhaMastro;
     Personagens[0].Escala = Ponto (1,1,1);
 
     Personagens[1].Posicao = Ponto (3,0);
     Personagens[1].Rotacao = -90;
-    Personagens[1].modelo = DesenhaCatavento;
+    Personagens[1].modelo = DesenhaMastro;
     
     Personagens[2].Posicao = Ponto (0,-5);
     Personagens[2].Rotacao = 0;
-    Personagens[2].modelo = DesenhaCatavento;
+    Personagens[2].modelo = DesenhaMastro;
     
     nInstancias = 3;
 
@@ -211,14 +211,26 @@ void CriaInstancias()
 // **********************************************************************
 void CarregaModelos()
 {
-    Mapa.LePoligono("tests/EstadoRS.txt");
-    MeiaSeta.LePoligono("tests/MeiaSeta.txt");
     Mastro.LePoligono("tests/Mastro.txt");
+    PontosDeControle.LePoligono("tests/PontosDeControle");
+    auxCurvas.LePoligono("tests/Curvas");
 }
 void CriaCurvas()
 {
-    nCurvas = 1;
-    Curvas[0] = Bezier(Ponto (-5,-5), Ponto (0,6), Ponto (5,-5));
+    //Curvas[0] = Bezier(Ponto (-5,-5), Ponto (0,6), Ponto (5,-5));
+    nCurvas = auxCurvas.getNVertices(); // topo do txt
+    cout << "ncurvas: " << nCurvas << endl;
+    for (size_t i; i < nCurvas; i++) {
+        Ponto ponto[3];
+        Ponto aux = auxCurvas.getVertice(i);
+        
+
+        ponto[0] = PontosDeControle.getVertice(aux.x);
+        ponto[1] = PontosDeControle.getVertice(aux.y);
+        ponto[2] = PontosDeControle.getVertice(aux.z);
+        Curvas[i] = Bezier(ponto[0], ponto[1], ponto[2]);
+    }
+
 }
 // **********************************************************************
 //
@@ -241,7 +253,7 @@ void init()
 // **********************************************************************
 void DesenhaPersonagens(float tempoDecorrido)
 {
-    cout << "nInstancias: "<< nInstancias << endl;
+    //cout << "nInstancias: "<< nInstancias << endl;
     for(int i=0; i<nInstancias;i++)
     {
         Personagens[i].AtualizaPosicao(tempoDecorrido);
@@ -295,14 +307,14 @@ void ContaTempo(double tempo)
     Temporizador T;
 
     unsigned long cont = 0;
-    cout << "Inicio contagem de " << tempo << "segundos ..." << flush;
+    //cout << "Inicio contagem de " << tempo << "segundos ..." << flush;
     while(true)
     {
         tempo -= T.getDeltaT();
         cont++;
         if (tempo <= 0.0)
         {
-            cout << "fim! - Passaram-se " << cont << " frames." << endl;
+            //cout << "fim! - Passaram-se " << cont << " frames." << endl;
             break;
         }
     }

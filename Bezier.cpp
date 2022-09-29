@@ -35,7 +35,7 @@ void Bezier::calculaComprimentoDaCurva()
     }
     P2 = Calcula(1.0); // faz o fechamento da curva
     ComprimentoTotalDaCurva += calculaDistancia(P1,P2);
-    cout << "ComprimentoTotalDaCurva: " << ComprimentoTotalDaCurva << endl;
+    //cout << "ComprimentoTotalDaCurva: " << ComprimentoTotalDaCurva << endl;
     
 }
 // **********************************************************************
