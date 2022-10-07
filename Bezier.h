@@ -31,11 +31,10 @@ using namespace std;
 class Bezier
 {
     Ponto Coords[3];
-    //int Indices[3];
 
 public:
     float ComprimentoTotalDaCurva;
-    int cor;
+    float r,g,b;
     
     Bezier();
     Bezier(Ponto P0, Ponto P1, Ponto P2);

@@ -82,7 +82,7 @@ void Poligono::obtemLimites(Ponto &Min, Ponto &Max)
 // **********************************************************************
 //
 // **********************************************************************
-void Poligono::LePoligono(const char *nome)
+void Poligono::LePoligono(const char *nome, bool is3D)
 {
     ifstream input;            // ofstream arq;
     input.open(nome, ios::in); //arq.open(nome, ios::out);
@@ -100,13 +100,17 @@ void Poligono::LePoligono(const char *nome)
 
     for (int i=0; i< qtdVertices; i++)
     {
-        double x,y;
+        double x,y,z;
         // Le cada elemento da linha
         input >> x >> y; // arq << x  << " " << y << endl
+        if(is3D)
+            input >> z; 
+        else
+            z = 0;        
         if(!input)
             break;
         //nLinha++;
-        insereVertice(Ponto(x,y));
+        insereVertice(Ponto(x,y,z));
     }
     cout << "Poligono lido com sucesso!" << endl;
 
