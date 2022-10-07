@@ -35,11 +35,11 @@ using namespace std;
 #include <GL/glut.h>
 #endif
 
-#include "InstanciaBZ.h"
-#include "ListaDeCoresRGB.h"
-#include "Poligono.h"
-#include "Ponto.h"
-#include "Temporizador.h"
+#include "include/InstanciaBZ.h"
+#include "include/ListaDeCoresRGB.h"
+#include "include/Poligono.h"
+#include "include/Ponto.h"
+#include "include/Temporizador.h"
 
 Temporizador T;
 double AccumDeltaT = 0;

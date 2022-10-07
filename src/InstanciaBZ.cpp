@@ -6,7 +6,7 @@
 //  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
 //
 
-#include "InstanciaBZ.h"
+#include "../include/InstanciaBZ.h"
 
 // ***********************************************************
 //  void InstanciaPonto(Ponto3D *p, Ponto3D *out)
