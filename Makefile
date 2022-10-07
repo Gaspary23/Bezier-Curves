@@ -1,6 +1,6 @@
 # Makefile para Linux e macOS
-
 PROG = Bezier
+
 CC = g++
 LINUX_FLAGS = -O3 -lGL -lGLU -lglut -lm -lstdc++
 DARWIN_FLAGS = -O3 -framework OpenGL -framework Cocoa -framework GLUT -lm -lstdc++
@@ -35,4 +35,4 @@ Linux:
 	$(CC) $(OBJ) $(OBJ_DIR)/AnimacaoComBezier.o $(LINUX_FLAGS) -o $(PROG)
 
 clean:
-	-@ rm -f $(OBJ) $(OBJ_DIR)/AnimacaoComBezier.o $(PROG)
+	-@ rm -rf $(OBJ_DIR) $(PROG)
