@@ -55,7 +55,7 @@ Ponto Min, Max;
 
 bool desenha = false;
 
-Poligono Mapa, MeiaSeta, Mastro, PontosDeControle, auxCurvas;
+Poligono Mapa, MeiaSeta, Triangulo, PontosDeControle, auxCurvas;
 int nInstancias = 0;
 
 float angulo = 0.0;
@@ -131,32 +131,23 @@ void DesenhaSeta() {
 }
 // **********************************************************************
 void DesenhaMastro() {
-    Mastro.desenhaPoligono();
+    Triangulo.desenhaPoligono();
 }
 // **********************************************************************
 // Esta funcao deve instanciar todos os personagens do cenario
 // **********************************************************************
 void CriaInstancias() {
-    /*Personagens[0].Posicao = Ponto(0, 0);
-    Personagens[0].Rotacao = 0;
+    Personagens[0].Posicao = Ponto(0, 0);
     Personagens[0].modelo = DesenhaMastro;
-    Personagens[0].Escala = Ponto(1, 1, 1);
+    Personagens[0].Escala = Ponto(0.5, 0.5, 0.5);
 
-    Personagens[1].Posicao = Ponto(3, 0);
-    Personagens[1].Rotacao = -90;
-    Personagens[1].modelo = DesenhaMastro;
-
-    Personagens[2].Posicao = Ponto(0, -5);
-    Personagens[2].Rotacao = 0;
-    Personagens[2].modelo = DesenhaMastro;
-
-    nInstancias = 3;*/
+    nInstancias = 1;
 }
 // **********************************************************************
 //
 // **********************************************************************
 void CarregaModelos() {
-    Mastro.LePoligono("tests/Mastro.txt", false);
+    Triangulo.LePoligono("tests/Triangulo", false);
     PontosDeControle.LePoligono("tests/PontosDeControle", false);
     auxCurvas.LePoligono("tests/Curvas", true);
 }
@@ -181,7 +172,6 @@ void init() {
 
     CarregaModelos();
     CriaInstancias();
-
     CriaCurvas();
 
     float d = 4.5;
@@ -193,6 +183,7 @@ void init() {
 void DesenhaPersonagens(float tempoDecorrido) {
     for (int i = 0; i < nInstancias; i++) {
         Personagens[i].AtualizaPosicao(tempoDecorrido);
+        //glColor3f(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
         Personagens[i].desenha();
     }
 }
@@ -273,10 +264,10 @@ void keyboard(unsigned char key, int x, int y) {
 void arrow_keys(int a_keys, int x, int y) {
     switch (a_keys) {
         case GLUT_KEY_LEFT:
-            Personagens[1].Posicao.x -= 0.5;
+            Personagens[0].Posicao.x -= 0.5;
             break;
         case GLUT_KEY_RIGHT:
-            Personagens[1].Rotacao++;
+            Personagens[0].Rotacao++;
             break;
         case GLUT_KEY_UP:      // Se pressionar UP
             glutFullScreen();  // Vai para Full Screen
