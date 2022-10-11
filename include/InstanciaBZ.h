@@ -21,7 +21,7 @@ class InstanciaBZ{
 
 public:
     InstanciaBZ();
-    InstanciaBZ(Bezier *Curva);
+    InstanciaBZ(Bezier *Curva, int nro, TipoFuncao *mod, float velocidade);
     
     TipoFuncao *modelo; // Modelo
 

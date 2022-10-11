@@ -150,19 +150,8 @@ void CriaCurvas() {
 // **********************************************************************
 void CriaInstancias() {
     for (int i = 0; i < nInstancias; i++) {
-        Personagens[i].Curva = &Curvas[i];
-        Personagens[i].Posicao = Ponto(0,0);
-        Personagens[i].Escala = Ponto(0.5, 0.5, 0.5);
-        Personagens[i].modelo = DesenhaMastro;
-        Personagens[i].Velocidade = velocidade;
+        Personagens[i] = InstanciaBZ(&Curvas[i], i, DesenhaMastro, velocidade);
     }
-
-    /*Personagens[0].Posicao = Ponto(0, 0);
-    Personagens[0].Rotacao = -90;
-    Personagens[0].modelo = DesenhaMastro;
-    Personagens[0].Escala = Ponto(0.5, 0.5, 0.5);
-    Personagens[0].Curva = &Curvas[0];
-    Personagens[0].Velocidade = velocidade;*/
 }
 // **********************************************************************
 //
@@ -172,8 +161,8 @@ void init() {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     CarregaModelos();
-    CriaInstancias();
     CriaCurvas();
+    CriaInstancias();
 
     float d = 4.5;
     Min = Ponto(-d, -(d-1));
@@ -222,6 +211,10 @@ void display(void) {
     
     glLineWidth(2);
     DesenhaCurvas();
+
+    /*for (int i = 0; i < 3; i++) {
+        cout << Personagens[i].cor << endl;
+    }*/
 
     glutSwapBuffers();
 }

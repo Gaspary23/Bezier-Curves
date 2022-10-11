@@ -43,7 +43,7 @@ Ponto InstanciaPonto(Ponto P) {
 InstanciaBZ::InstanciaBZ() {
     Rotacao = 0;
     Posicao = Ponto(0, 0, 0);
-    Escala = Ponto(1, 1, 1);
+    Escala = Ponto(0.5, 0.5, 0.5);
 
     nroDaCurva = 0;
     proxCurva = -1;
@@ -53,14 +53,18 @@ InstanciaBZ::InstanciaBZ() {
     cor = rand() % 100;
 }
 
-InstanciaBZ::InstanciaBZ(Bezier *C) {
+InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) {
     Rotacao = 0;
     Posicao = Ponto(0, 0, 0);
-    Escala = Ponto(1, 1, 1);
+    Escala = Ponto(0.5, 0.5, 0.5);
 
     Curva = C;
     tAtual = 0;
     direcao = 1;
+
+    nroDaCurva = nro;
+    modelo = *mod;
+    Velocidade = velocidade;
     
     cor = rand() % 100;
 }
@@ -72,6 +76,7 @@ void InstanciaBZ::desenha() {
     glRotatef(Rotacao, 0, 0, 1);
     glScalef(Escala.x, Escala.y, Escala.z);
 
+    cout << "n: " << nroDaCurva << " cor: " << cor << endl;
     (*modelo)();  // desenha a instancia
     glPopMatrix();
 }
