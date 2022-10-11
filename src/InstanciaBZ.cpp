@@ -61,8 +61,6 @@ InstanciaBZ::InstanciaBZ(Bezier *C) {
 }
 
 void InstanciaBZ::desenha() {
-    // Escala.imprime("Escala: ");
-    // cout << endl;
     //  Aplica as transformacoes geometricas no modelo
     glPushMatrix();
     glTranslatef(Posicao.x, Posicao.y, 0);
@@ -70,24 +68,60 @@ void InstanciaBZ::desenha() {
     glScalef(Escala.x, Escala.y, Escala.z);
 
     (*modelo)();  // desenha a instancia
-
     glPopMatrix();
 }
 Ponto InstanciaBZ::ObtemPosicao() {
     // aplica as transformacoes geometricas no modelo
     // desenha a geometria do objeto
-
     glPushMatrix();
     glTranslatef(Posicao.x, Posicao.y, 0);
     glRotatef(Rotacao, 0, 0, 1);
     Ponto PosicaoDoPersonagem;
     Ponto Origem(0, 0, 0);
     InstanciaPonto(Origem, PosicaoDoPersonagem);
-    // PosicaoDoPersonagem.imprime(); cout << endl;
     glPopMatrix();
     return PosicaoDoPersonagem;
 }
 
 void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
-    // cout << "AtualizaPosicao" << endl;
+    //  Atualiza a posicao do personagem
+    //  de acordo com a curva e o tempo decorrido
+    //  desde a ultima atualizacao
+
+    //  Calcula a posicao do personagem
+    //  de acordo com a curva e o tempo decorrido
+    //  desde a ultima atualizacao
+    tAtual += tempoDecorrido * direcao * Velocidade;
+    if (tAtual > 1.0) {
+        tAtual = 1.0;
+        direcao = -1;
+    }
+    if (tAtual < 0.0) {
+        tAtual = 0.0;
+        direcao = 1;
+    }
+    Posicao = ObtemPosicao();
+
+    //  Calcula a rotacao do personagem
+    //  de acordo com a curva e o tempo decorrido
+    //  desde a ultima atualizacao
+    Ponto Tangente = Curva->Calcula(tAtual);
+    Rotacao = atan2(Tangente.y, Tangente.x) * 180 / M_PI;
+
+    Posicao.x += Tangente.x * 0.1;
+    Posicao.y += Tangente.y * 0.1;
+
+    //  Verifica se o personagem chegou ao final da curva
+    if (tAtual == 1.0) {
+        //  Se chegou ao final da curva, verifica se
+        //  existe uma proxima curva
+        if (proxCurva != -1) {
+            //  Se existe uma proxima curva, atualiza
+            //  o ponteiro para a curva atual
+            nroDaCurva = proxCurva;
+            proxCurva = -1;
+            tAtual = 0.0;
+            direcao = 1;
+        }
+    }
 }

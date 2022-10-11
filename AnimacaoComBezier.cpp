@@ -46,6 +46,7 @@ double AccumDeltaT = 0;
 Temporizador T2;
 
 InstanciaBZ Personagens[10];
+float velocidade = 0.5;
 
 unsigned int nCurvas;
 Bezier Curvas[20];
@@ -55,7 +56,7 @@ Ponto Min, Max;
 
 bool desenha = false;
 
-Poligono Mapa, MeiaSeta, Triangulo, PontosDeControle, auxCurvas;
+Poligono Mapa, Triangulo, PontosDeControle, auxCurvas;
 int nInstancias = 0;
 
 float angulo = 0.0;
@@ -120,28 +121,9 @@ void DesenhaEixos() {
     glVertex2f(Meio.x, Max.y);
     glEnd();
 }
-
-// **********************************************************************
-void DesenhaSeta() {
-    glPushMatrix();
-    MeiaSeta.desenhaPoligono();
-    glScaled(1, -1, 1);
-    MeiaSeta.desenhaPoligono();
-    glPopMatrix();
-}
 // **********************************************************************
 void DesenhaMastro() {
     Triangulo.desenhaPoligono();
-}
-// **********************************************************************
-// Esta funcao deve instanciar todos os personagens do cenario
-// **********************************************************************
-void CriaInstancias() {
-    Personagens[0].Posicao = Ponto(0, 0);
-    Personagens[0].modelo = DesenhaMastro;
-    Personagens[0].Escala = Ponto(0.5, 0.5, 0.5);
-
-    nInstancias = 1;
 }
 // **********************************************************************
 //
@@ -164,6 +146,18 @@ void CriaCurvas() {
     }
 }
 // **********************************************************************
+// Esta funcao deve instanciar todos os personagens do cenario
+// **********************************************************************
+void CriaInstancias() {
+    Personagens[0].Posicao = Ponto(0, 0);
+    Personagens[0].modelo = DesenhaMastro;
+    Personagens[0].Escala = Ponto(0.5, 0.5, 0.5);
+    Personagens[0].Curva = &Curvas[0];
+    Personagens[0].Velocidade = velocidade;
+
+    nInstancias = 1;
+}
+// **********************************************************************
 //
 // **********************************************************************
 void init() {
@@ -183,7 +177,6 @@ void init() {
 void DesenhaPersonagens(float tempoDecorrido) {
     for (int i = 0; i < nInstancias; i++) {
         Personagens[i].AtualizaPosicao(tempoDecorrido);
-        //glColor3f(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
         Personagens[i].desenha();
     }
 }
@@ -218,6 +211,7 @@ void display(void) {
 
     glLineWidth(2);
     DesenhaPersonagens(T2.getDeltaT());
+    cout << T2.getDeltaT() << endl;
     
     glLineWidth(2);
     DesenhaCurvas();

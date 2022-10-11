@@ -25,7 +25,7 @@ public:
     
     TipoFuncao *modelo; // Modelo
 
-    Bezier *Curva; // referencia para a curva onde esta' a instancia
+    Bezier *Curva; // referencia para a curva onde esta a instancia
     Ponto Posicao, Escala;
     float Rotacao;
 
