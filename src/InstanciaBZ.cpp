@@ -76,7 +76,6 @@ void InstanciaBZ::desenha() {
     glRotatef(Rotacao, 0, 0, 1);
     glScalef(Escala.x, Escala.y, Escala.z);
 
-    cout << "n: " << nroDaCurva << " cor: " << cor << endl;
     (*modelo)();  // desenha a instancia
     glPopMatrix();
 }

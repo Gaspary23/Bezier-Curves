@@ -1,17 +1,12 @@
 // **********************************************************************
-// PUCRS/Escola Polit�cnica
-// COMPUTA��O GR�FICA
+// PUCRS/Escola Politecnica
+// COMPUTACAO GRAFICA
 //
 // Programa basico para criar aplicacoes 2D em OpenGL
 //
 // Marcio Sarroglia Pinho
 // pinho@pucrs.br
 // **********************************************************************
-
-// Para uso no Xcode:
-// Abra o menu Product -> Scheme -> Edit Scheme -> Use custom working directory
-// Selecione a pasta onde voce descompactou o ZIP que continha este arquivo.
-//
 
 #include <cmath>
 #include <ctime>
@@ -56,8 +51,8 @@ Ponto Min, Max;
 
 bool desenha = false;
 
-Poligono Mapa, Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 3;
+Poligono Triangulo, PontosDeControle, auxCurvas;
+int nInstancias = 10;
 
 float angulo = 0.0;
 
