@@ -210,13 +210,16 @@ void display(void) {
     // Coloque aqui as chamadas das rotinas que desenham os objetos
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    glLineWidth(1);
-    glColor3f(0, 0, 0);  // R, G, B  [0..1]
-
-    if(desenha)
+    if(desenha) {
+        glLineWidth(1);
+        glColor3f(0, 0, 0);  // R, G, B  [0..1]
         DesenhaEixos();
+    }
 
+    glLineWidth(2);
     DesenhaPersonagens(T2.getDeltaT());
+    
+    glLineWidth(2);
     DesenhaCurvas();
 
     glutSwapBuffers();

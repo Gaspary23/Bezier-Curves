@@ -34,6 +34,8 @@ class Poligono
     vector <Ponto> Vertices;
     Ponto Min, Max;
 public:
+    int cor;
+    
     Poligono();
     Ponto getVertice(int);
     unsigned long getNVertices();

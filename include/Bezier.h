@@ -34,7 +34,7 @@ class Bezier
 
 public:
     float ComprimentoTotalDaCurva;
-    float r,g,b;
+    int cor;
     
     Bezier();
     Bezier(Ponto P0, Ponto P1, Ponto P2);

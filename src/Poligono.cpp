@@ -10,10 +10,11 @@
 using namespace std;
 
 #include "../include/Poligono.h"
+#include "../include/ListaDeCoresRGB.h"
 
 Poligono::Poligono()
 {
-    
+    cor = rand()%100;
 }
 
 void Poligono::insereVertice(Ponto p)
@@ -47,6 +48,7 @@ void Poligono::pintaPoligono()
 void Poligono::desenhaPoligono()
 {
     glBegin(GL_LINE_LOOP);
+    defineCor(cor);
     for (int i=0; i<Vertices.size(); i++)
         glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
     glEnd();

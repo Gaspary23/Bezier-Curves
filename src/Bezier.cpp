@@ -4,6 +4,7 @@
 //
 
 #include "../include/Bezier.h"
+#include "../include/ListaDeCoresRGB.h"
 
 // **********************************************************************
 //
@@ -31,9 +32,7 @@ Bezier::Bezier() {
         Coords[i] = Ponto(0, 0, 0);
     ComprimentoTotalDaCurva = 0;
 
-    r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    cor = rand() % 100;
 }
 // **********************************************************************
 Bezier::Bezier(Ponto V[]) {
@@ -41,9 +40,7 @@ Bezier::Bezier(Ponto V[]) {
         Coords[i] = V[i];
     calculaComprimentoDaCurva();
 
-    r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    cor = rand() % 100;
 }
 // **********************************************************************
 //
@@ -73,7 +70,7 @@ void Bezier::Traca() {
     double DeltaT = 1.0 / 50;
     Ponto P;
     
-    glColor3f(r,g,b);
+    defineCor(cor);
     glBegin(GL_LINE_STRIP);
 
     while (t < 1.0) {
