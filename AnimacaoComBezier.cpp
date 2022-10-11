@@ -46,7 +46,7 @@ double AccumDeltaT = 0;
 Temporizador T2;
 
 InstanciaBZ Personagens[10];
-float velocidade = 0.5;
+float velocidade = 1;
 
 unsigned int nCurvas;
 Bezier Curvas[20];
@@ -150,6 +150,7 @@ void CriaCurvas() {
 // **********************************************************************
 void CriaInstancias() {
     Personagens[0].Posicao = Ponto(0, 0);
+    Personagens[0].Rotacao = -90;
     Personagens[0].modelo = DesenhaMastro;
     Personagens[0].Escala = Ponto(0.5, 0.5, 0.5);
     Personagens[0].Curva = &Curvas[0];
@@ -211,7 +212,6 @@ void display(void) {
 
     glLineWidth(2);
     DesenhaPersonagens(T2.getDeltaT());
-    cout << T2.getDeltaT() << endl;
     
     glLineWidth(2);
     DesenhaCurvas();

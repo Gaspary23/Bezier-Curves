@@ -84,14 +84,10 @@ Ponto InstanciaBZ::ObtemPosicao() {
 }
 
 void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
-    //  Atualiza a posicao do personagem
-    //  de acordo com a curva e o tempo decorrido
-    //  desde a ultima atualizacao
+    float distanciaPercorrida = Velocidade * tempoDecorrido;
+    tAtual +=  direcao * Curva->CalculaT(distanciaPercorrida);
 
-    //  Calcula a posicao do personagem
-    //  de acordo com a curva e o tempo decorrido
-    //  desde a ultima atualizacao
-    tAtual += tempoDecorrido * direcao * Velocidade;
+    // Vai ate o fim e volta
     if (tAtual > 1.0) {
         tAtual = 1.0;
         direcao = -1;
@@ -100,28 +96,10 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
         tAtual = 0.0;
         direcao = 1;
     }
-    Posicao = ObtemPosicao();
 
-    //  Calcula a rotacao do personagem
-    //  de acordo com a curva e o tempo decorrido
-    //  desde a ultima atualizacao
-    Ponto Tangente = Curva->Calcula(tAtual);
-    Rotacao = atan2(Tangente.y, Tangente.x) * 180 / M_PI;
-
-    Posicao.x += Tangente.x * 0.1;
-    Posicao.y += Tangente.y * 0.1;
-
-    //  Verifica se o personagem chegou ao final da curva
-    if (tAtual == 1.0) {
-        //  Se chegou ao final da curva, verifica se
-        //  existe uma proxima curva
-        if (proxCurva != -1) {
-            //  Se existe uma proxima curva, atualiza
-            //  o ponteiro para a curva atual
-            nroDaCurva = proxCurva;
-            proxCurva = -1;
-            tAtual = 0.0;
-            direcao = 1;
-        }
-    }
+    // atualiza a posicao do personagem
+    Posicao = Curva->Calcula(tAtual);
+    
+    // atualiza a rotacao do personagem
+    Rotacao += atan2(Posicao.x, Posicao.y)/(M_PI);
 }
