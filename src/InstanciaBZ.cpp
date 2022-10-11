@@ -7,6 +7,7 @@
 //
 
 #include "../include/InstanciaBZ.h"
+#include "../include/ListaDeCoresRGB.h"
 
 // ***********************************************************
 //  void InstanciaPonto(Ponto3D *p, Ponto3D *out)
@@ -48,6 +49,8 @@ InstanciaBZ::InstanciaBZ() {
     proxCurva = -1;
     tAtual = 0.0;
     direcao = 1;
+
+    cor = rand() % 100;
 }
 
 InstanciaBZ::InstanciaBZ(Bezier *C) {
@@ -58,6 +61,8 @@ InstanciaBZ::InstanciaBZ(Bezier *C) {
     Curva = C;
     tAtual = 0;
     direcao = 1;
+    
+    cor = rand() % 100;
 }
 
 void InstanciaBZ::desenha() {
@@ -101,5 +106,6 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
     Posicao = Curva->Calcula(tAtual);
     
     // atualiza a rotacao do personagem
-    Rotacao += atan2(Posicao.x, Posicao.y)/(M_PI);
+    Rotacao = atan2(Posicao.y, Posicao.x) * 180 / (M_PI);
+    //cout << Rotacao << endl;
 }

@@ -57,7 +57,7 @@ Ponto Min, Max;
 bool desenha = false;
 
 Poligono Mapa, Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 0;
+int nInstancias = 3;
 
 float angulo = 0.0;
 
@@ -149,14 +149,20 @@ void CriaCurvas() {
 // Esta funcao deve instanciar todos os personagens do cenario
 // **********************************************************************
 void CriaInstancias() {
-    Personagens[0].Posicao = Ponto(0, 0);
+    for (int i = 0; i < nInstancias; i++) {
+        Personagens[i].Curva = &Curvas[i];
+        Personagens[i].Posicao = Ponto(0,0);
+        Personagens[i].Escala = Ponto(0.5, 0.5, 0.5);
+        Personagens[i].modelo = DesenhaMastro;
+        Personagens[i].Velocidade = velocidade;
+    }
+
+    /*Personagens[0].Posicao = Ponto(0, 0);
     Personagens[0].Rotacao = -90;
     Personagens[0].modelo = DesenhaMastro;
     Personagens[0].Escala = Ponto(0.5, 0.5, 0.5);
     Personagens[0].Curva = &Curvas[0];
-    Personagens[0].Velocidade = velocidade;
-
-    nInstancias = 1;
+    Personagens[0].Velocidade = velocidade;*/
 }
 // **********************************************************************
 //
@@ -177,7 +183,8 @@ void init() {
 // **********************************************************************
 void DesenhaPersonagens(float tempoDecorrido) {
     for (int i = 0; i < nInstancias; i++) {
-        Personagens[i].AtualizaPosicao(tempoDecorrido);
+        if (i != 0) 
+            Personagens[i].AtualizaPosicao(tempoDecorrido);
         Personagens[i].desenha();
     }
 }
@@ -248,6 +255,9 @@ void keyboard(unsigned char key, int x, int y) {
         case 't':
             ContaTempo(3);
             break;
+        case ' ':
+            Personagens[0].AtualizaPosicao(T2.getDeltaT());
+            break;
         case 27:      // Termina o programa qdo
             exit(0);  // a tecla ESC for pressionada
             break;
@@ -284,6 +294,7 @@ void arrow_keys(int a_keys, int x, int y) {
 // **********************************************************************
 int main(int argc, char** argv) {
     cout << "Programa OpenGL" << endl;
+    srand(time(0));
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
