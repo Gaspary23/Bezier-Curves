@@ -110,6 +110,6 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
     Posicao = Curva->Calcula(tAtual);
     
     // atualiza a rotacao do personagem
-    Rotacao = atan2(Posicao.y, Posicao.x) * 180 / (M_PI);
-    //cout << Rotacao << endl;
+    Ponto Tangente = Curva->Calcula(tAtual);
+    Rotacao = atan2(Tangente.y, Tangente.x) * 180 / M_PI;
 }

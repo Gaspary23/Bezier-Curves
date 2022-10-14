@@ -52,7 +52,7 @@ Ponto Min, Max;
 bool desenha = false;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 10;
+int nInstancias = 3;
 
 float angulo = 0.0;
 
@@ -160,14 +160,14 @@ void init() {
     CriaInstancias();
 
     float d = 4.5;
-    Min = Ponto(-d, -(d-1));
-    Max = Ponto(d, d-1);
+    Min = Ponto(-d, -(d - 1));
+    Max = Ponto(d, d - 1);
 }
 
 // **********************************************************************
 void DesenhaPersonagens(float tempoDecorrido) {
     for (int i = 0; i < nInstancias; i++) {
-        if (i != 0) 
+        if (i != 0)
             Personagens[i].AtualizaPosicao(tempoDecorrido);
         Personagens[i].desenha();
     }
@@ -195,7 +195,7 @@ void display(void) {
     // Coloque aqui as chamadas das rotinas que desenham os objetos
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    if(desenha) {
+    if (desenha) {
         glLineWidth(1);
         glColor3f(0, 0, 0);  // R, G, B  [0..1]
         DesenhaEixos();
@@ -203,7 +203,7 @@ void display(void) {
 
     glLineWidth(2);
     DesenhaPersonagens(T2.getDeltaT());
-    
+
     glLineWidth(2);
     DesenhaCurvas();
 
