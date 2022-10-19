@@ -52,7 +52,7 @@ Ponto Min, Max;
 bool desenha = false;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 3;
+int nInstancias = 10;
 
 float angulo = 0.0;
 

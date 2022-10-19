@@ -8,6 +8,7 @@
 
 #include "../include/InstanciaBZ.h"
 #include "../include/ListaDeCoresRGB.h"
+#include "../include/Ponto.h"
 
 // ***********************************************************
 //  void InstanciaPonto(Ponto3D *p, Ponto3D *out)
@@ -54,7 +55,6 @@ InstanciaBZ::InstanciaBZ() {
 }
 
 InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) {
-    Rotacao = 0;
     Posicao = Ponto(0, 0, 0);
     Escala = Ponto(0.5, 0.5, 0.5);
 
@@ -65,6 +65,13 @@ InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) 
     nroDaCurva = nro;
     modelo = *mod;
     Velocidade = velocidade;
+    
+    /*float tFuturo = direcao * Curva->CalculaT(velocidade);
+    Ponto v0 = Ponto(1,0,0);
+    Ponto v1 = Curva->Calcula(tFuturo) - Curva->Calcula(tAtual);
+
+    Rotacao = acos(ProdEscalar(v0, v1) / v1.modulo());*/
+    Rotacao = 0;
     
     cor = rand() % 100;
 }
@@ -96,20 +103,13 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
     float distanciaPercorrida = Velocidade * tempoDecorrido;
     tAtual +=  direcao * Curva->CalculaT(distanciaPercorrida);
 
-    // Vai ate o fim e volta
-    if (tAtual > 1.0) {
-        tAtual = 1.0;
-        direcao = -1;
-    }
-    if (tAtual < 0.0) {
-        tAtual = 0.0;
-        direcao = 1;
-    }
-
     // atualiza a posicao do personagem
     Posicao = Curva->Calcula(tAtual);
     
     // atualiza a rotacao do personagem
-    Ponto Tangente = Curva->Calcula(tAtual);
-    Rotacao = atan2(Tangente.y, Tangente.x) * 180 / M_PI;
+    float tFuturo = tAtual + direcao * Curva->CalculaT(distanciaPercorrida);
+    Ponto v0 = Ponto(1,0,0);
+    Ponto v1 = Curva->Calcula(tFuturo) - Curva->Calcula(tAtual);
+
+    Rotacao = acos(ProdEscalar(v0, v1) / v1.modulo()) * 180 / M_PI;
 }
