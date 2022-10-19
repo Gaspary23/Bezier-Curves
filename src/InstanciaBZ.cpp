@@ -100,16 +100,19 @@ Ponto InstanciaBZ::ObtemPosicao() {
 }
 
 void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
+    // calcula a nova posicao do personagem
     float distanciaPercorrida = Velocidade * tempoDecorrido;
     tAtual +=  direcao * Curva->CalculaT(distanciaPercorrida);
 
     // atualiza a posicao do personagem
     Posicao = Curva->Calcula(tAtual);
     
-    // atualiza a rotacao do personagem
+    // calcula o proximo ponto da curva e o angulo entre o vetor atual e o proximo
     float tFuturo = tAtual + direcao * Curva->CalculaT(distanciaPercorrida);
     Ponto v0 = Ponto(1,0,0);
     Ponto v1 = Curva->Calcula(tFuturo) - Curva->Calcula(tAtual);
+    float angulo = acos(ProdEscalar(v0, v1) / v1.modulo()) * 180 / M_PI;
 
-    Rotacao = acos(ProdEscalar(v0, v1) / v1.modulo()) * 180 / M_PI;
+    // atualiza a rotacao do personagem
+    Rotacao = v1.y >= 0 ?  angulo : -angulo;
 }
