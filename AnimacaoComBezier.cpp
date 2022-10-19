@@ -12,6 +12,8 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <vector>
 
 using namespace std;
 
@@ -36,6 +38,12 @@ using namespace std;
 #include "include/Ponto.h"
 #include "include/Temporizador.h"
 
+struct PontoCompare {
+    bool operator()(const Ponto& lhs, const Ponto& rhs) const {
+        return lhs.x < rhs.x;
+    }
+}; // Nao funciona
+
 Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
@@ -45,19 +53,21 @@ float velocidade = 1;
 
 unsigned int nCurvas;
 Bezier Curvas[20];
+map<Ponto, vector<int>, PontoCompare> mapa; // Mudar chave para int
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
-
 bool desenha = false;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 10;
+int nInstancias = 2;
 
 float angulo = 0.0;
 
 double nFrames = 0;
 double TempoTotal = 0;
+
+int escolheProxCurva(int i);
 
 // **********************************************************************
 //
@@ -128,6 +138,9 @@ void CarregaModelos() {
     PontosDeControle.LePoligono("tests/PontosDeControle", false);
     auxCurvas.LePoligono("tests/Curvas", true);
 }
+// **********************************************************************
+//
+// **********************************************************************
 void CriaCurvas() {
     nCurvas = auxCurvas.getNVertices();  // topo do txt
     for (size_t i; i < nCurvas; i++) {
@@ -141,11 +154,35 @@ void CriaCurvas() {
     }
 }
 // **********************************************************************
+//
+// **********************************************************************
+void CriaMapaCurvas() {
+    for (size_t i; i < nCurvas; i++) {
+        Ponto aux = auxCurvas.getVertice(i);
+        int inicial = aux.x, final = aux.z;
+
+        Ponto ponto1 = PontosDeControle.getVertice(aux.x);
+        Ponto ponto2 = PontosDeControle.getVertice(aux.z);
+
+        for (int j = 0; j < 2; j++) {
+            Ponto ponto = j == 0 ? ponto1 : ponto2;
+            if (mapa.find(ponto1) != mapa.end()) {
+                mapa[ponto1].push_back(i);
+            } else {
+                vector<int> vec;
+                vec.push_back(i);
+                mapa[ponto1] = vec;
+            }
+        }
+    }
+}
+// **********************************************************************
 // Esta funcao deve instanciar todos os personagens do cenario
 // **********************************************************************
 void CriaInstancias() {
     for (int i = 0; i < nInstancias; i++) {
         Personagens[i] = InstanciaBZ(&Curvas[i], i, DesenhaMastro, velocidade);
+        Personagens[i].proxCurva = escolheProxCurva(i);
     }
 }
 // **********************************************************************
@@ -157,18 +194,41 @@ void init() {
 
     CarregaModelos();
     CriaCurvas();
+    CriaMapaCurvas();
     CriaInstancias();
 
     float d = 4.5;
     Min = Ponto(-d, -(d - 1));
     Max = Ponto(d, d - 1);
 }
+// **********************************************************************
+//
+// **********************************************************************
+int escolheProxCurva(int i) {
+    Ponto ponto;
+    if(Personagens[i].direcao == 1)
+        ponto = Personagens[i].Curva->getPC(2);
+    else if (Personagens[i].direcao == -1)
+        ponto = Personagens[i].Curva->getPC(0);
 
+    vector<int> curvas = mapa[ponto];
+    int n = curvas.size();
+    int r = rand() % n;
+
+    return curvas[r];
+}
+// **********************************************************************
+//
 // **********************************************************************
 void DesenhaPersonagens(float tempoDecorrido) {
     for (int i = 0; i < nInstancias; i++) {
         if (i != 0)
             Personagens[i].AtualizaPosicao(tempoDecorrido);
+        if (Personagens[i].tAtual == 1) {
+            Personagens[i].tAtual = 0;
+            Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
+            Personagens[i].proxCurva = escolheProxCurva(i);
+        }
         Personagens[i].desenha();
     }
 }
@@ -206,10 +266,6 @@ void display(void) {
 
     glLineWidth(2);
     DesenhaCurvas();
-
-    /*for (int i = 0; i < 3; i++) {
-        cout << Personagens[i].cor << endl;
-    }*/
 
     glutSwapBuffers();
 }
