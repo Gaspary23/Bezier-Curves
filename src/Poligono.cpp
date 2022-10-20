@@ -9,11 +9,9 @@
 #include <iostream>
 using namespace std;
 
-#include "../include/ListaDeCoresRGB.h"
 #include "../include/Poligono.h"
 
 Poligono::Poligono() {
-    cor = rand() % 100;
 }
 
 void Poligono::insereVertice(Ponto p) {
@@ -74,7 +72,7 @@ void Poligono::obtemLimites(Ponto &Min, Ponto &Max) {
 // **********************************************************************
 //
 // **********************************************************************
-void Poligono::LePoligono(const char *nome, bool is3D) {
+void Poligono::LePoligono(const char *nome, bool is3D = false) {
     ifstream input;             // ofstream arq;
     input.open(nome, ios::in);  // arq.open(nome, ios::out);
     if (!input) {

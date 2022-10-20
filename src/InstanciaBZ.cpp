@@ -7,7 +7,6 @@
 //
 
 #include "../include/InstanciaBZ.h"
-#include "../include/ListaDeCoresRGB.h"
 #include "../include/Ponto.h"
 
 // ***********************************************************
@@ -50,8 +49,6 @@ InstanciaBZ::InstanciaBZ() {
     proxCurva = -1;
     tAtual = 0.0;
     direcao = 1;
-
-    cor = rand() % 100;
 }
 
 InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) {
@@ -66,8 +63,6 @@ InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) 
     modelo = *mod;
     Velocidade = velocidade;
     Rotacao = 0;
-    
-    cor = rand() % 100;
 }
 
 void InstanciaBZ::desenha() {

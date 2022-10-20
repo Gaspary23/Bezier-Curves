@@ -13,7 +13,6 @@
 using namespace std;
 
 #include "Bezier.h"
-#include "ListaDeCoresRGB.h"
 
 typedef void TipoFuncao();
 
@@ -31,7 +30,6 @@ public:
 
     int nroDaCurva;
     int proxCurva;
-    int cor;
     float Velocidade;
     float tAtual;
     int direcao; // andando do fim para o inicio, ou ao contrario

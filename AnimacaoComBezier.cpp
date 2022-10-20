@@ -48,7 +48,7 @@ unsigned int nCurvas;
 Bezier Curvas[20];
 map<int, vector<int>> mapa;
 
-const unsigned int nInstancias = 1;
+const unsigned int nInstancias = 13;
 InstanciaBZ Personagens[nInstancias];
 float velocidade = 3;
 
@@ -126,8 +126,8 @@ void DesenhaMastro() {
 //
 // **********************************************************************
 void CarregaModelos() {
-    Triangulo.LePoligono("tests/Triangulo", false);
-    PontosDeControle.LePoligono("tests/PontosDeControle", false);
+    Triangulo.LePoligono("tests/Triangulo");
+    PontosDeControle.LePoligono("tests/PontosDeControle");
     auxCurvas.LePoligono("tests/Curvas", true);
 }
 // **********************************************************************
