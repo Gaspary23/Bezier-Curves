@@ -1,6 +1,6 @@
 // **********************************************************************
-// PUCRS/Escola Polit�cnica
-// COMPUTA��O GR�FICA
+// PUCRS/Escola Politecnica
+// COMPUTACAO GRAFICA
 //
 // Programa basico para criar aplicacoes 2D em OpenGL
 //
@@ -8,15 +8,14 @@
 // pinho@pucrs.br
 // **********************************************************************
 
-// Para uso no Xcode:
-// Abra o menu Product -> Scheme -> Edit Scheme -> Use custom working directory
-// Selecione a pasta onde voce descompactou o ZIP que continha este arquivo.
-//
-
 #include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <vector>
+#include <omp.h>
+#include <chrono>
 
 using namespace std;
 
@@ -41,25 +40,37 @@ using namespace std;
 #include "include/Ponto.h"
 #include "include/Temporizador.h"
 
+typedef struct  AABB{ 
+    Ponto Centro; 
+    Ponto MeiaLarg;
+    Int minX,minY,maxX,maxY;
+    AABB()
+    Centro = ponto(0,0,0);
+    MeiaLarg = ponto(0,0,0);
+    minX=0;
+    minY=0;
+    maxX=0;
+    maxY=0;
+} 
+
 Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
 
-InstanciaBZ Personagens[10];
-
 unsigned int nCurvas;
 Bezier Curvas[20];
+map<int, vector<int>> mapa;
+
+const unsigned int nInstancias = 1;
+InstanciaBZ Personagens[nInstancias];
+float velocidade = 3;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
+bool desenha = false, movimenta = false;
 
-bool desenha = false;
-
-Poligono Mapa, MeiaSeta, Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 0;
-
+Poligono Triangulo, PontosDeControle, auxCurvas;
 float angulo = 0.0;
-
 double nFrames = 0;
 double TempoTotal = 0;
 
@@ -120,28 +131,9 @@ void DesenhaEixos() {
     glVertex2f(Meio.x, Max.y);
     glEnd();
 }
-
-// **********************************************************************
-void DesenhaSeta() {
-    glPushMatrix();
-    MeiaSeta.desenhaPoligono();
-    glScaled(1, -1, 1);
-    MeiaSeta.desenhaPoligono();
-    glPopMatrix();
-}
 // **********************************************************************
 void DesenhaMastro() {
     Triangulo.desenhaPoligono();
-}
-// **********************************************************************
-// Esta funcao deve instanciar todos os personagens do cenario
-// **********************************************************************
-void CriaInstancias() {
-    Personagens[0].Posicao = Ponto(0, 0);
-    Personagens[0].modelo = DesenhaMastro;
-    Personagens[0].Escala = Ponto(0.5, 0.5, 0.5);
-
-    nInstancias = 1;
 }
 // **********************************************************************
 //
@@ -151,6 +143,9 @@ void CarregaModelos() {
     PontosDeControle.LePoligono("tests/PontosDeControle", false);
     auxCurvas.LePoligono("tests/Curvas", true);
 }
+// **********************************************************************
+//
+// **********************************************************************
 void CriaCurvas() {
     nCurvas = auxCurvas.getNVertices();  // topo do txt
     for (size_t i; i < nCurvas; i++) {
@@ -163,6 +158,118 @@ void CriaCurvas() {
         Curvas[i] = Bezier(ponto);
     }
 }
+void PosicionaEnvelope(Poligono *envelope) {
+    float esquerda, direita, cima, baixo;
+    for (int i = 0; i < CampoDeVisao.getNVertices(); i++) {
+        if (i == 0) {
+            esquerda = CampoDeVisao.getVertice(i).x;
+            direita = CampoDeVisao.getVertice(i).x;
+            cima = CampoDeVisao.getVertice(i).y;
+            baixo = CampoDeVisao.getVertice(i).y;
+        } else {
+            if (CampoDeVisao.getVertice(i).x < esquerda) {
+                esquerda = CampoDeVisao.getVertice(i).x;
+            }
+            if (CampoDeVisao.getVertice(i).x > direita) {
+                direita = CampoDeVisao.getVertice(i).x;
+            }
+            if (CampoDeVisao.getVertice(i).y < baixo) {
+                baixo = CampoDeVisao.getVertice(i).y;
+            }
+            if (CampoDeVisao.getVertice(i).y > cima) {
+                cima = CampoDeVisao.getVertice(i).y;
+            }
+        }
+    }
+    envelope->alteraVertice(0, Ponto(esquerda, baixo, 0));
+    envelope->alteraVertice(1, Ponto(direita, baixo, 0));
+    envelope->alteraVertice(2, Ponto(direita, cima, 0));
+    envelope->alteraVertice(3, Ponto(esquerda, cima, 0));
+}
+
+// **********************************************************************
+//
+// **********************************************************************
+void ChecaEV(){
+for(int i = 1; i <= Personagens.size; i++){
+    if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
+     bool aux = envelope(i);
+     if(aux == true){
+        //Colisão!
+     }
+    }
+}
+}
+// **********************************************************************
+// algoritmo de colisão:
+// **********************************************************************
+bool envelope(int IndiceInimigo) {
+struct AABB Personagem = AABB();
+struct AABB Inimigo = AABB();
+Poligono Personagemaux = PosicionaEnvelope(Personagem[0]);
+Poligono Inimigoaux =  PosicionaEnvelope(Personagem[IndiceInimigo]);
+Personagem.Centro = (operator*(operator+(Personagemaux.getVertice(0),Personagemaux.getVertice(2))),0,5)
+Inimigo.Centro = (operator*(operator+(Inimigoaux.getVertice(0),Inimigoaux.getVertice(2))),0,5)
+
+if ( Abs(Personagem.Centro.x - Inimigo.Centro.x) > (Personagem.MeiaLarg.x + Inimigo.MeiaLarg.x)){
+    return false;
+}
+else {
+return true;
+}
+}
+// **********************************************************************
+//
+// **********************************************************************
+void CriaMapaCurvas() {
+    for (size_t i = 0; i < nCurvas; i++) {
+        Ponto aux = auxCurvas.getVertice(i);
+        int inicial = aux.x, final = aux.z;
+
+        for (int j = 0; j < 2; j++) {
+            int ponto = j == 0 ? inicial : final;
+            if (mapa.find(ponto) != mapa.end()) {
+                mapa[ponto].push_back(i);
+            } else {
+                vector<int> *vec = &mapa[ponto];
+                vec->push_back(i);
+            }
+        }
+    }
+}
+// **********************************************************************
+//
+// **********************************************************************
+int escolheProxCurva(int i, int shift = 0) {
+    int ponto;
+    
+    if(Personagens[i].direcao == 1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
+    else if (Personagens[i].direcao == -1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
+
+    vector<int> curvas = mapa[ponto];
+    int r;
+    int n = curvas.size();
+
+    if (shift == 0) {
+        r = rand() % n;
+    } else {
+        int delta = Personagens[i].proxCurva + shift;
+        r = delta > n - 1 ? 0 : delta < 0 ? n - 1 : delta;
+    }
+
+    return curvas[r];
+}
+// **********************************************************************
+// Esta funcao deve instanciar todos os personagens do cenario
+// **********************************************************************
+void CriaInstancias() {
+    for (int i = 0; i < nInstancias; i++) {
+        Personagens[i] = InstanciaBZ(&Curvas[i], i, DesenhaMastro, velocidade);
+        Personagens[i].proxCurva = escolheProxCurva(i);
+    }
+}
 // **********************************************************************
 //
 // **********************************************************************
@@ -171,19 +278,32 @@ void init() {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     CarregaModelos();
-    CriaInstancias();
     CriaCurvas();
+    CriaMapaCurvas();
+    CriaInstancias();
 
     float d = 4.5;
-    Min = Ponto(-d, -(d-1));
-    Max = Ponto(d, d-1);
+    Min = Ponto(-d, -(d - 1));
+    Max = Ponto(d, d - 1);
 }
-
+// **********************************************************************
+//
 // **********************************************************************
 void DesenhaPersonagens(float tempoDecorrido) {
-    for (int i = 0; i < nInstancias; i++) {
-        Personagens[i].AtualizaPosicao(tempoDecorrido);
-        //glColor3f(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+    int i;    
+    #pragma omp parallel for schedule(dynamic) private(i)
+    for (i = 0; i < nInstancias; i++) {
+        if (i != 0 || movimenta) {
+            Personagens[i].AtualizaPosicao(tempoDecorrido);
+        }
+        if (Personagens[i].tAtual == 1 || Personagens[i].tAtual == 0) {
+            Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
+            Personagens[i].nroDaCurva = Personagens[i].proxCurva;
+            Personagens[i].proxCurva = escolheProxCurva(i);
+        }
+
+        if(i == 0) defineCor(Green);
+        else defineCor(Red);
         Personagens[i].desenha();
     }
 }
@@ -191,7 +311,14 @@ void DesenhaPersonagens(float tempoDecorrido) {
 //
 // **********************************************************************
 void DesenhaCurvas() {
-    for (int i = 0; i < nCurvas; i++) {
+    int i;
+    #pragma omp parallel for schedule(dynamic) private(i)
+    for (i = 0; i < nCurvas; i++) {
+        if (Personagens[0].nroDaCurva == i || Personagens[0].proxCurva == i) {
+            glLineWidth(4);
+        }
+        else
+            glLineWidth(2);
         Curvas[i].Traca();
     }
 }
@@ -202,7 +329,7 @@ void display(void) {
     // Limpa a tela coma cor de fundo
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Define os limites l�gicos da �rea OpenGL dentro da Janela
+    // Define os limites logicos da area OpenGL dentro da Janela
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -210,7 +337,7 @@ void display(void) {
     // Coloque aqui as chamadas das rotinas que desenham os objetos
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    if(desenha) {
+    if (desenha) {
         glLineWidth(1);
         glColor3f(0, 0, 0);  // R, G, B  [0..1]
         DesenhaEixos();
@@ -218,8 +345,7 @@ void display(void) {
 
     glLineWidth(2);
     DesenhaPersonagens(T2.getDeltaT());
-    
-    glLineWidth(2);
+
     DesenhaCurvas();
 
     glutSwapBuffers();
@@ -254,6 +380,9 @@ void keyboard(unsigned char key, int x, int y) {
         case 't':
             ContaTempo(3);
             break;
+        case ' ':
+            movimenta = !movimenta;
+            break;
         case 27:      // Termina o programa qdo
             exit(0);  // a tecla ESC for pressionada
             break;
@@ -267,10 +396,10 @@ void keyboard(unsigned char key, int x, int y) {
 void arrow_keys(int a_keys, int x, int y) {
     switch (a_keys) {
         case GLUT_KEY_LEFT:
-            Personagens[0].Posicao.x -= 0.5;
+            Personagens[0].proxCurva = escolheProxCurva(0, 1);
             break;
         case GLUT_KEY_RIGHT:
-            Personagens[0].Rotacao++;
+            Personagens[0].proxCurva = escolheProxCurva(0, -1);
             break;
         case GLUT_KEY_UP:      // Se pressionar UP
             glutFullScreen();  // Vai para Full Screen
@@ -290,6 +419,7 @@ void arrow_keys(int a_keys, int x, int y) {
 // **********************************************************************
 int main(int argc, char** argv) {
     cout << "Programa OpenGL" << endl;
+    srand(time(0));
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
