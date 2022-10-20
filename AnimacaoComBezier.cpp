@@ -38,12 +38,6 @@ using namespace std;
 #include "include/Ponto.h"
 #include "include/Temporizador.h"
 
-struct PontoCompare {
-    bool operator()(const Ponto& lhs, const Ponto& rhs) const {
-        return lhs.x < rhs.x;
-    }
-}; // Nao funciona
-
 Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
@@ -53,14 +47,14 @@ float velocidade = 1;
 
 unsigned int nCurvas;
 Bezier Curvas[20];
-map<Ponto, vector<int>, PontoCompare> mapa; // Mudar chave para int
+map<int, vector<int>> mapa;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
 bool desenha = false;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 2;
+int nInstancias = 10;
 
 float angulo = 0.0;
 
@@ -157,21 +151,17 @@ void CriaCurvas() {
 //
 // **********************************************************************
 void CriaMapaCurvas() {
-    for (size_t i; i < nCurvas; i++) {
+    for (size_t i = 0; i < nCurvas; i++) {
         Ponto aux = auxCurvas.getVertice(i);
         int inicial = aux.x, final = aux.z;
 
-        Ponto ponto1 = PontosDeControle.getVertice(aux.x);
-        Ponto ponto2 = PontosDeControle.getVertice(aux.z);
-
         for (int j = 0; j < 2; j++) {
-            Ponto ponto = j == 0 ? ponto1 : ponto2;
-            if (mapa.find(ponto1) != mapa.end()) {
-                mapa[ponto1].push_back(i);
+            int ponto = j == 0 ? inicial : final;
+            if (mapa.find(ponto) != mapa.end()) {
+                mapa[ponto].push_back(i);
             } else {
-                vector<int> vec;
-                vec.push_back(i);
-                mapa[ponto1] = vec;
+                vector<int> *vec = &mapa[ponto];
+                vec->push_back(i);
             }
         }
     }
@@ -205,15 +195,19 @@ void init() {
 //
 // **********************************************************************
 int escolheProxCurva(int i) {
-    Ponto ponto;
+    cout << "Escolhendo proxima curva para " << i << endl;
+    int ponto;
     if(Personagens[i].direcao == 1)
-        ponto = Personagens[i].Curva->getPC(2);
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
     else if (Personagens[i].direcao == -1)
-        ponto = Personagens[i].Curva->getPC(0);
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
+
 
     vector<int> curvas = mapa[ponto];
     int n = curvas.size();
+    cout << "Tamanho: " << n << endl;
     int r = rand() % n;
+    cout << "Escolhida: " << r << endl;
 
     return curvas[r];
 }
@@ -229,6 +223,7 @@ void DesenhaPersonagens(float tempoDecorrido) {
             Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
             Personagens[i].proxCurva = escolheProxCurva(i);
         }
+        defineCor(Personagens[i].cor);
         Personagens[i].desenha();
     }
 }
