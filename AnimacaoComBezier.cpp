@@ -167,7 +167,7 @@ void CriaMapaCurvas() {
 // **********************************************************************
 //
 // **********************************************************************
-int escolheProxCurva(int i) {
+int escolheProxCurva(int i, int shift = 0) {
     int ponto;
     
     if(Personagens[i].direcao == 1)
@@ -176,8 +176,15 @@ int escolheProxCurva(int i) {
         ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
 
     vector<int> curvas = mapa[ponto];
+    int r;
     int n = curvas.size();
-    int r = rand() % n;
+
+    if (shift == 0) {
+        r = rand() % n;
+    } else {
+        int delta = Personagens[i].proxCurva + shift;
+        r = delta > n - 1 ? 0 : delta < 0 ? n - 1 : delta;
+    }
 
     return curvas[r];
 }
@@ -316,10 +323,10 @@ void keyboard(unsigned char key, int x, int y) {
 void arrow_keys(int a_keys, int x, int y) {
     switch (a_keys) {
         case GLUT_KEY_LEFT:
-            Personagens[0].Posicao.x -= 0.5;
+            Personagens[0].proxCurva = escolheProxCurva(0, 1);
             break;
         case GLUT_KEY_RIGHT:
-            Personagens[0].Rotacao++;
+            Personagens[0].proxCurva = escolheProxCurva(0, -1);
             break;
         case GLUT_KEY_UP:      // Se pressionar UP
             glutFullScreen();  // Vai para Full Screen
