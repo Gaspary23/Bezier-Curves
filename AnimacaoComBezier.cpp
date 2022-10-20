@@ -43,7 +43,7 @@ double AccumDeltaT = 0;
 Temporizador T2;
 
 InstanciaBZ Personagens[10];
-float velocidade = 1;
+float velocidade = 3;
 
 unsigned int nCurvas;
 Bezier Curvas[20];
@@ -51,10 +51,10 @@ map<int, vector<int>> mapa;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
-bool desenha = false;
+bool desenha = false, movimenta = false;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 10;
+int nInstancias = 3;
 
 float angulo = 0.0;
 
@@ -153,6 +153,7 @@ void CriaCurvas() {
 void CriaMapaCurvas() {
     for (size_t i = 0; i < nCurvas; i++) {
         Ponto aux = auxCurvas.getVertice(i);
+        // cout << "Curva: " << i << " -> " << aux.x << " " << aux.y << " " << aux.z << endl;
         int inicial = aux.x, final = aux.z;
 
         for (int j = 0; j < 2; j++) {
@@ -195,8 +196,11 @@ void init() {
 //
 // **********************************************************************
 int escolheProxCurva(int i) {
-    cout << "Escolhendo proxima curva para " << i << endl;
+    cout << "\n Escolhendo proxima curva para " << i << endl;
     int ponto;
+    
+    cout << "Direcao: " << Personagens[i].direcao << endl;
+    
     if(Personagens[i].direcao == 1)
         ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
     else if (Personagens[i].direcao == -1)
@@ -205,7 +209,11 @@ int escolheProxCurva(int i) {
 
     vector<int> curvas = mapa[ponto];
     int n = curvas.size();
-    cout << "Tamanho: " << n << endl;
+
+    for (int i = 0; i < n; i++) {
+        cout << curvas[i] << " ";
+    } cout << endl;
+
     int r = rand() % n;
     cout << "Escolhida: " << r << endl;
 
@@ -216,10 +224,10 @@ int escolheProxCurva(int i) {
 // **********************************************************************
 void DesenhaPersonagens(float tempoDecorrido) {
     for (int i = 0; i < nInstancias; i++) {
-        if (i != 0)
+        if (i != 0 || movimenta) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
-        if (Personagens[i].tAtual == 1) {
-            Personagens[i].tAtual = 0;
+        }
+        if (Personagens[i].tAtual == 1 || Personagens[i].tAtual == 0) {
             Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
             Personagens[i].proxCurva = escolheProxCurva(i);
         }
@@ -295,7 +303,8 @@ void keyboard(unsigned char key, int x, int y) {
             ContaTempo(3);
             break;
         case ' ':
-            Personagens[0].AtualizaPosicao(T2.getDeltaT());
+            movimenta = !movimenta;
+            // Personagens[0].AtualizaPosicao(T2.getDeltaT());
             break;
         case 27:      // Termina o programa qdo
             exit(0);  // a tecla ESC for pressionada
