@@ -40,19 +40,6 @@ using namespace std;
 #include "include/Ponto.h"
 #include "include/Temporizador.h"
 
-typedef struct  AABB{ 
-    Ponto Centro; 
-    Ponto MeiaLarg;
-    Int minX,minY,maxX,maxY;
-    AABB()
-    Centro = ponto(0,0,0);
-    MeiaLarg = ponto(0,0,0);
-    minX=0;
-    minY=0;
-    maxX=0;
-    maxY=0;
-} 
-
 Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
@@ -158,6 +145,39 @@ void CriaCurvas() {
         Curvas[i] = Bezier(ponto);
     }
 }
+// **********************************************************************
+//
+// **********************************************************************
+void ChecaEV(){
+for(int i = 1; i <= Personagens.size; i++){
+    if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
+     bool aux = envelope(i);
+     if(aux == true){
+        //Colisão!
+     }
+    }
+}
+}
+// **********************************************************************
+//
+// **********************************************************************
+void CriaEnvelope() {
+    Ponto vetor = Ponto(1, 0, 0);
+
+    Envelope.insereVertice(Ponto(0, 0, 0));
+
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
+
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
+
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
+}
+// **********************************************************************
+//
+// **********************************************************************
 void PosicionaEnvelope(Poligono *envelope) {
     float esquerda, direita, cima, baixo;
     for (int i = 0; i < CampoDeVisao.getNVertices(); i++) {
@@ -188,35 +208,31 @@ void PosicionaEnvelope(Poligono *envelope) {
 }
 
 // **********************************************************************
-//
-// **********************************************************************
-void ChecaEV(){
-for(int i = 1; i <= Personagens.size; i++){
-    if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
-     bool aux = envelope(i);
-     if(aux == true){
-        //Colisão!
-     }
-    }
-}
-}
-// **********************************************************************
 // algoritmo de colisão:
 // **********************************************************************
-bool envelope(int IndiceInimigo) {
-struct AABB Personagem = AABB();
-struct AABB Inimigo = AABB();
-Poligono Personagemaux = PosicionaEnvelope(Personagem[0]);
-Poligono Inimigoaux =  PosicionaEnvelope(Personagem[IndiceInimigo]);
-Personagem.Centro = (operator*(operator+(Personagemaux.getVertice(0),Personagemaux.getVertice(2))),0,5)
-Inimigo.Centro = (operator*(operator+(Inimigoaux.getVertice(0),Inimigoaux.getVertice(2))),0,5)
-
-if ( Abs(Personagem.Centro.x - Inimigo.Centro.x) > (Personagem.MeiaLarg.x + Inimigo.MeiaLarg.x)){
+bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
+    if (min1.x <= max2.x && max1.x >= min2.x &&
+        min1.y <= max2.y && max1.y >= min2.y) {
+        return true;
+    }
     return false;
 }
-else {
-return true;
-}
+// **********************************************************************
+//
+// **********************************************************************
+bool envelope(int IndiceInimigo) {
+Poligono Personagem = CriaEnvelope();
+Poligono Personagem = PosicionaEnvelope(Personagem[0]);
+Poligono Inimigo = CriaEnvelope();
+Poligono Inimigo =  PosicionaEnvelope(Personagem[IndiceInimigo]);
+
+Ponto min1 = Personagemaux.getVertice(0);
+Ponto max1 = Personagemaux.getVertice(2);
+Ponto min2 = Inimigoaux.getVertice(0); 
+Ponto max2 = Inimigoaux.getVertice(2);
+
+bool aux = colide(min1,max1,min2,max2);
+return aux;
 }
 // **********************************************************************
 //
