@@ -48,7 +48,7 @@ unsigned int nCurvas;
 Bezier Curvas[20];
 map<int, vector<int>> mapa;
 
-const unsigned int nInstancias = 13;
+const unsigned int nInstancias = 1;
 InstanciaBZ Personagens[nInstancias];
 float velocidade = 3;
 
@@ -126,8 +126,8 @@ void DesenhaMastro() {
 //
 // **********************************************************************
 void CarregaModelos() {
-    Triangulo.LePoligono("tests/Triangulo");
-    PontosDeControle.LePoligono("tests/PontosDeControle");
+    Triangulo.LePoligono("tests/Triangulo", false);
+    PontosDeControle.LePoligono("tests/PontosDeControle", false);
     auxCurvas.LePoligono("tests/Curvas", true);
 }
 // **********************************************************************
@@ -171,9 +171,9 @@ int escolheProxCurva(int i, int shift = 0) {
     int ponto;
     
     if(Personagens[i].direcao == 1)
-        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
-    else if (Personagens[i].direcao == -1)
         ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
+    else if (Personagens[i].direcao == -1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
 
     vector<int> curvas = mapa[ponto];
     int r;
@@ -182,8 +182,20 @@ int escolheProxCurva(int i, int shift = 0) {
     if (shift == 0) {
         r = rand() % n;
     } else {
-        int delta = Personagens[i].proxCurva + shift;
+        int pos;
+        for (pos = 0; pos < n; pos++)
+            if (curvas[pos] == Personagens[i].nroDaCurva)
+                break;
+        
+        int delta = pos + shift;
         r = delta > n - 1 ? 0 : delta < 0 ? n - 1 : delta;
+
+        cout << "n: " << n << endl;
+        cout << "pos: " << pos << endl;
+        cout << "delta: " << delta << " r: " << r << endl;
+        for (int j = 0; j < n; j++) {
+            cout << "Curva: " << curvas[j] << ", ";
+        }cout << "\n\n" << endl;
     }
 
     return curvas[r];
@@ -223,12 +235,11 @@ void DesenhaPersonagens(float tempoDecorrido) {
         if (i != 0 || movimenta) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
         }
-        if (Personagens[i].tAtual == 1 || Personagens[i].tAtual == 0) {
+        if (Personagens[i].nroDaCurva == Personagens[i].proxCurva) {
             Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
-            Personagens[i].nroDaCurva = Personagens[i].proxCurva;
             Personagens[i].proxCurva = escolheProxCurva(i);
         }
-
+        
         if(i == 0) defineCor(Green);
         else defineCor(Red);
         Personagens[i].desenha();
@@ -323,10 +334,10 @@ void keyboard(unsigned char key, int x, int y) {
 void arrow_keys(int a_keys, int x, int y) {
     switch (a_keys) {
         case GLUT_KEY_LEFT:
-            Personagens[0].proxCurva = escolheProxCurva(0, 1);
+            Personagens[0].proxCurva = escolheProxCurva(0, -1);
             break;
         case GLUT_KEY_RIGHT:
-            Personagens[0].proxCurva = escolheProxCurva(0, -1);
+            Personagens[0].proxCurva = escolheProxCurva(0, 1);
             break;
         case GLUT_KEY_UP:      // Se pressionar UP
             glutFullScreen();  // Vai para Full Screen
