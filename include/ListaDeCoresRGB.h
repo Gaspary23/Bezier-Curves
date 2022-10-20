@@ -123,7 +123,8 @@ enum {
     Yellow,
     Green,
     Black,
-    DarkYellow
+    DarkYellow,
+    Red
 };
 
 

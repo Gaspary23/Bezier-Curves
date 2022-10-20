@@ -48,18 +48,16 @@ unsigned int nCurvas;
 Bezier Curvas[20];
 map<int, vector<int>> mapa;
 
-const unsigned int nInstancias = 3;
+const unsigned int nInstancias = 1;
 InstanciaBZ Personagens[nInstancias];
-float velocidade = 1;
+float velocidade = 3;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
 bool desenha = false, movimenta = false;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
-
 float angulo = 0.0;
-
 double nFrames = 0;
 double TempoTotal = 0;
 
@@ -173,9 +171,9 @@ int escolheProxCurva(int i) {
     int ponto;
     
     if(Personagens[i].direcao == 1)
-        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
-    else if (Personagens[i].direcao == -1)
         ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
+    else if (Personagens[i].direcao == -1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
 
     vector<int> curvas = mapa[ponto];
     int n = curvas.size();
@@ -220,9 +218,12 @@ void DesenhaPersonagens(float tempoDecorrido) {
         }
         if (Personagens[i].tAtual == 1 || Personagens[i].tAtual == 0) {
             Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
+            Personagens[i].nroDaCurva = Personagens[i].proxCurva;
             Personagens[i].proxCurva = escolheProxCurva(i);
         }
-        defineCor(Personagens[i].cor);
+
+        if(i == 0) defineCor(Green);
+        else defineCor(Red);
         Personagens[i].desenha();
     }
 }
@@ -233,6 +234,11 @@ void DesenhaCurvas() {
     int i;
     #pragma omp parallel for schedule(dynamic) private(i)
     for (i = 0; i < nCurvas; i++) {
+        if (Personagens[0].nroDaCurva == i || Personagens[0].proxCurva == i) {
+            glLineWidth(4);
+        }
+        else
+            glLineWidth(2);
         Curvas[i].Traca();
     }
 }
@@ -260,7 +266,6 @@ void display(void) {
     glLineWidth(2);
     DesenhaPersonagens(T2.getDeltaT());
 
-    glLineWidth(2);
     DesenhaCurvas();
 
     glutSwapBuffers();
