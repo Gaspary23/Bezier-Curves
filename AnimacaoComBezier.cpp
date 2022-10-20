@@ -14,6 +14,8 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <omp.h>
+#include <chrono>
 
 using namespace std;
 
@@ -42,26 +44,24 @@ Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
 
-InstanciaBZ Personagens[10];
-float velocidade = 3;
-
 unsigned int nCurvas;
 Bezier Curvas[20];
 map<int, vector<int>> mapa;
+
+const unsigned int nInstancias = 3;
+InstanciaBZ Personagens[nInstancias];
+float velocidade = 1;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
 bool desenha = false, movimenta = false;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
-int nInstancias = 3;
 
 float angulo = 0.0;
 
 double nFrames = 0;
 double TempoTotal = 0;
-
-int escolheProxCurva(int i);
 
 // **********************************************************************
 //
@@ -153,7 +153,6 @@ void CriaCurvas() {
 void CriaMapaCurvas() {
     for (size_t i = 0; i < nCurvas; i++) {
         Ponto aux = auxCurvas.getVertice(i);
-        // cout << "Curva: " << i << " -> " << aux.x << " " << aux.y << " " << aux.z << endl;
         int inicial = aux.x, final = aux.z;
 
         for (int j = 0; j < 2; j++) {
@@ -166,6 +165,23 @@ void CriaMapaCurvas() {
             }
         }
     }
+}
+// **********************************************************************
+//
+// **********************************************************************
+int escolheProxCurva(int i) {
+    int ponto;
+    
+    if(Personagens[i].direcao == 1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
+    else if (Personagens[i].direcao == -1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
+
+    vector<int> curvas = mapa[ponto];
+    int n = curvas.size();
+    int r = rand() % n;
+
+    return curvas[r];
 }
 // **********************************************************************
 // Esta funcao deve instanciar todos os personagens do cenario
@@ -195,35 +211,10 @@ void init() {
 // **********************************************************************
 //
 // **********************************************************************
-int escolheProxCurva(int i) {
-    cout << "\n Escolhendo proxima curva para " << i << endl;
-    int ponto;
-    
-    cout << "Direcao: " << Personagens[i].direcao << endl;
-    
-    if(Personagens[i].direcao == 1)
-        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
-    else if (Personagens[i].direcao == -1)
-        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
-
-
-    vector<int> curvas = mapa[ponto];
-    int n = curvas.size();
-
-    for (int i = 0; i < n; i++) {
-        cout << curvas[i] << " ";
-    } cout << endl;
-
-    int r = rand() % n;
-    cout << "Escolhida: " << r << endl;
-
-    return curvas[r];
-}
-// **********************************************************************
-//
-// **********************************************************************
 void DesenhaPersonagens(float tempoDecorrido) {
-    for (int i = 0; i < nInstancias; i++) {
+    int i;    
+    #pragma omp parallel for schedule(dynamic) private(i)
+    for (i = 0; i < nInstancias; i++) {
         if (i != 0 || movimenta) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
         }
@@ -239,7 +230,9 @@ void DesenhaPersonagens(float tempoDecorrido) {
 //
 // **********************************************************************
 void DesenhaCurvas() {
-    for (int i = 0; i < nCurvas; i++) {
+    int i;
+    #pragma omp parallel for schedule(dynamic) private(i)
+    for (i = 0; i < nCurvas; i++) {
         Curvas[i].Traca();
     }
 }
@@ -250,7 +243,7 @@ void display(void) {
     // Limpa a tela coma cor de fundo
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Define os limites l�gicos da �rea OpenGL dentro da Janela
+    // Define os limites logicos da area OpenGL dentro da Janela
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -304,7 +297,6 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case ' ':
             movimenta = !movimenta;
-            // Personagens[0].AtualizaPosicao(T2.getDeltaT());
             break;
         case 27:      // Termina o programa qdo
             exit(0);  // a tecla ESC for pressionada

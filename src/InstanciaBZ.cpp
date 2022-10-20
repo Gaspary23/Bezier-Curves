@@ -65,12 +65,6 @@ InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) 
     nroDaCurva = nro;
     modelo = *mod;
     Velocidade = velocidade;
-    
-    /*float tFuturo = direcao * Curva->CalculaT(velocidade);
-    Ponto v0 = Ponto(1,0,0);
-    Ponto v1 = Curva->Calcula(tFuturo) - Curva->Calcula(tAtual);
-
-    Rotacao = acos(ProdEscalar(v0, v1) / v1.modulo());*/
     Rotacao = 0;
     
     cor = rand() % 100;
