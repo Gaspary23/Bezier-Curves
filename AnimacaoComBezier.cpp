@@ -56,7 +56,7 @@ float velocidade = 3;
 Ponto Min, Max;
 bool desenha = false, movimenta = false;
 
-Poligono Triangulo, PontosDeControle, auxCurvas;
+Poligono Triangulo, PontosDeControle, auxCurvas, CampoDeVisao, Envelope;
 float angulo = 0.0;
 double nFrames = 0;
 double TempoTotal = 0;
@@ -149,7 +149,7 @@ void CriaCurvas() {
 //
 // **********************************************************************
 void ChecaEV(){
-for(int i = 1; i <= Personagens.size; i++){
+for(int i = 1; i <= nInstancias; i++){
     if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
      bool aux = envelope(i);
      if(aux == true){
@@ -161,10 +161,10 @@ for(int i = 1; i <= Personagens.size; i++){
 // **********************************************************************
 //
 // **********************************************************************
-void CriaEnvelope() {
+Poligono CriaEnvelope (Ponto init) {
     Ponto vetor = Ponto(1, 0, 0);
 
-    Envelope.insereVertice(Ponto(0, 0, 0));
+    Envelope.insereVertice(init);
 
     vetor.rotacionaZ(90);
     Envelope.insereVertice(vetor);
@@ -174,11 +174,13 @@ void CriaEnvelope() {
 
     vetor.rotacionaZ(90);
     Envelope.insereVertice(vetor);
+
+    return Envelope;
 }
 // **********************************************************************
 //
 // **********************************************************************
-void PosicionaEnvelope(Poligono *envelope) {
+Poligono PosicionaEnvelope(Poligono *envelope) {
     float esquerda, direita, cima, baixo;
     for (int i = 0; i < CampoDeVisao.getNVertices(); i++) {
         if (i == 0) {
@@ -205,6 +207,7 @@ void PosicionaEnvelope(Poligono *envelope) {
     envelope->alteraVertice(1, Ponto(direita, baixo, 0));
     envelope->alteraVertice(2, Ponto(direita, cima, 0));
     envelope->alteraVertice(3, Ponto(esquerda, cima, 0));
+    return *envelope;
 }
 
 // **********************************************************************
@@ -221,15 +224,16 @@ bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
 //
 // **********************************************************************
 bool envelope(int IndiceInimigo) {
-Poligono Personagem = CriaEnvelope();
-Poligono Personagem = PosicionaEnvelope(Personagem[0]);
-Poligono Inimigo = CriaEnvelope();
-Poligono Inimigo =  PosicionaEnvelope(Personagem[IndiceInimigo]);
+Poligono PersonagemEnv = CriaEnvelope(Personagens[0].Posicao);
+Poligono Personagem = PosicionaEnvelope(&PersonagemEnv);
 
-Ponto min1 = Personagemaux.getVertice(0);
-Ponto max1 = Personagemaux.getVertice(2);
-Ponto min2 = Inimigoaux.getVertice(0); 
-Ponto max2 = Inimigoaux.getVertice(2);
+Poligono InimigoEnv = CriaEnvelope(Personagens[IndiceInimigo].Posicao);
+Poligono Inimigo =  PosicionaEnvelope(&InimigoEnv);
+
+Ponto min1 = PersonagemEnv.getVertice(0);
+Ponto max1 = PersonagemEnv.getVertice(2);
+Ponto min2 = InimigoEnv.getVertice(0); 
+Ponto max2 = InimigoEnv.getVertice(2);
 
 bool aux = colide(min1,max1,min2,max2);
 return aux;
