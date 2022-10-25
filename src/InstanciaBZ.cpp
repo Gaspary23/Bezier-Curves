@@ -105,16 +105,4 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
 
     // atualiza a rotacao do personagem
     Rotacao = v1.y >= 0 ?  angulo : -angulo;
-
-    // verifica se o personagem chegou ao fim da curva
-    if (tAtual >= 1.0) {
-        tAtual = 1.0;
-        direcao = -1;
-        nroDaCurva = proxCurva;
-    }
-    else if (tAtual <= 0.0) {
-        tAtual = 0.0;
-        direcao = 1;
-        nroDaCurva = proxCurva;
-    }
 }

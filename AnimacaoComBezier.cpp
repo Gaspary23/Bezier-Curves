@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 #include <omp.h>
-#include <chrono>
+#include <tuple>
 
 using namespace std;
 
@@ -46,7 +46,9 @@ Temporizador T2;
 
 unsigned int nCurvas;
 Bezier Curvas[20];
-map<int, vector<int>> mapa;
+// chave: indice do ponto de controle
+// Valor: indice da curva e direcao
+map<int, vector<tuple<int, int>>> mapa;
 
 const unsigned int nInstancias = 1;
 InstanciaBZ Personagens[nInstancias];
@@ -156,10 +158,10 @@ void CriaMapaCurvas() {
         for (int j = 0; j < 2; j++) {
             int ponto = j == 0 ? inicial : final;
             if (mapa.find(ponto) != mapa.end()) {
-                mapa[ponto].push_back(i);
+                mapa[ponto].push_back(tuple(i, j));
             } else {
-                vector<int> *vec = &mapa[ponto];
-                vec->push_back(i);
+                vector<tuple<int, int>> *vec = &mapa[ponto];
+                vec->push_back(tuple(i, j));
             }
         }
     }
@@ -168,14 +170,13 @@ void CriaMapaCurvas() {
 //
 // **********************************************************************
 int escolheProxCurva(int i, int shift = 0) {
-    int ponto;
-    
+    int ponto;    
     if(Personagens[i].direcao == 1)
         ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
     else if (Personagens[i].direcao == -1)
         ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
 
-    vector<int> curvas = mapa[ponto];
+    vector<tuple<int,int>> curvas = mapa[ponto];
     int r;
     int n = curvas.size();
 
@@ -184,21 +185,37 @@ int escolheProxCurva(int i, int shift = 0) {
     } else {
         int pos;
         for (pos = 0; pos < n; pos++)
-            if (curvas[pos] == Personagens[i].nroDaCurva)
+            if (get<0>(curvas[pos]) == Personagens[i].nroDaCurva)
                 break;
         
         int delta = pos + shift;
         r = delta > n - 1 ? 0 : delta < 0 ? n - 1 : delta;
-
-        cout << "n: " << n << endl;
-        cout << "pos: " << pos << endl;
-        cout << "delta: " << delta << " r: " << r << endl;
-        for (int j = 0; j < n; j++) {
-            cout << "Curva: " << curvas[j] << ", ";
-        }cout << "\n\n" << endl;
     }
 
-    return curvas[r];
+    return get<0>(curvas[r]);
+}
+// **********************************************************************
+//
+// **********************************************************************
+void MudaCurvas(int i) {
+    Personagens[i].nroDaCurva = Personagens[i].proxCurva;
+
+    int ponto;    
+    if(Personagens[i].direcao == 1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
+    else if (Personagens[i].direcao == -1)
+        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
+    vector<tuple<int,int>> curvas = mapa[ponto];
+
+    int r;
+    int n = curvas.size();
+    int pos;
+        for (pos = 0; pos < n; pos++)
+            if (get<0>(curvas[pos]) == Personagens[i].nroDaCurva)
+                break;
+
+    Personagens[i].direcao = get<1>(curvas[r]) == 0 ? 1 : -1;
+    Personagens[i].tAtual = get<1>(curvas[r]);
 }
 // **********************************************************************
 // Esta funcao deve instanciar todos os personagens do cenario
@@ -206,7 +223,7 @@ int escolheProxCurva(int i, int shift = 0) {
 void CriaInstancias() {
     for (int i = 0; i < nInstancias; i++) {
         Personagens[i] = InstanciaBZ(&Curvas[i], i, DesenhaMastro, velocidade);
-        Personagens[i].proxCurva = escolheProxCurva(i);
+        escolheProxCurva(i);
     }
 }
 // **********************************************************************
@@ -228,18 +245,22 @@ void init() {
 // **********************************************************************
 //
 // **********************************************************************
-void DesenhaPersonagens(float tempoDecorrido) {
-    int i;    
-    #pragma omp parallel for schedule(dynamic) private(i)
-    for (i = 0; i < nInstancias; i++) {
+void MovimentaPersonagens(float tempoDecorrido) {
+    for (int i = 0; i < nInstancias; i++) {
         if (i != 0 || movimenta) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
         }
-        if (Personagens[i].nroDaCurva == Personagens[i].proxCurva) {
-            Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
+        if (Personagens[i].tAtual >= 1.0 || Personagens[i].tAtual <= 0.0) {
+            MudaCurvas(i);
             Personagens[i].proxCurva = escolheProxCurva(i);
         }
-        
+    }
+}
+// **********************************************************************
+//
+// **********************************************************************
+void DesenhaPersonagens() {
+    for (int i = 0; i < nInstancias; i++) {        
         if(i == 0) defineCor(Green);
         else defineCor(Red);
         Personagens[i].desenha();
@@ -281,8 +302,9 @@ void display(void) {
         DesenhaEixos();
     }
 
+    MovimentaPersonagens(T2.getDeltaT());
     glLineWidth(2);
-    DesenhaPersonagens(T2.getDeltaT());
+    DesenhaPersonagens();
 
     DesenhaCurvas();
 
