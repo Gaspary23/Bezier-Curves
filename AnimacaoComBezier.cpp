@@ -44,8 +44,8 @@ Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
 
-unsigned int nCurvas;
-Bezier Curvas[20];
+const unsigned int nCurvas=28;
+Bezier Curvas[nCurvas];
 // chave: indice do ponto de controle
 // Valor: indice da curva e direcao
 map<int, vector<tuple<int, int>>> mapa;
@@ -56,7 +56,7 @@ float velocidade = 3;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
-bool desenha = false, movimenta = false;
+bool desenha = false, movimenta = true;
 
 Poligono Triangulo, PontosDeControle, auxCurvas;
 float angulo = 0.0;
@@ -136,15 +136,29 @@ void CarregaModelos() {
 //
 // **********************************************************************
 void CriaCurvas() {
-    nCurvas = auxCurvas.getNVertices();  // topo do txt
-    for (size_t i; i < nCurvas; i++) {
-        Ponto ponto[3];
+    Ponto ponto[3];
+    for (size_t i = 0; i < 13; i++) {
         Ponto aux = auxCurvas.getVertice(i);
 
         ponto[0] = PontosDeControle.getVertice(aux.x);
         ponto[1] = PontosDeControle.getVertice(aux.y);
         ponto[2] = PontosDeControle.getVertice(aux.z);
-        Curvas[i] = Bezier(ponto);
+
+        for (size_t j = 0; j < 2; j++) {
+            ponto[0].x += j == 0 ? +5 : -10;
+            ponto[1].x += j == 0 ? +5 : -10;
+            ponto[2].x += j == 0 ? +5 : -10;
+            int idx = j == 0 ? i : i+13;
+            Curvas[idx] = Bezier(ponto);
+        }
+    }
+    // Cria conexoes entre os dois mapas
+    for (size_t i = 0; i < 2; i++) {
+        ponto[0] = i == 0 ? Ponto(-1,0) : Ponto(1,0);
+        ponto[1] = i == 0 ? Ponto(0,1)  : Ponto(0,-1);
+        ponto[2] = i == 0 ? Ponto(1,0)  : Ponto(-1,0);
+        int idx = i == 0 ? 26 : 27;
+        Curvas[idx] = Bezier(ponto);
     }
 }
 // **********************************************************************
@@ -158,13 +172,21 @@ void CriaMapaCurvas() {
         for (int j = 0; j < 2; j++) {
             int ponto = j == 0 ? inicial : final;
             if (mapa.find(ponto) != mapa.end()) {
-                mapa[ponto].push_back(tuple(i, j));
+                mapa[ponto].push_back(make_tuple(i, j));
             } else {
                 vector<tuple<int, int>> *vec = &mapa[ponto];
-                vec->push_back(tuple(i, j));
+                vec->push_back(make_tuple(i, j));
             }
         }
     }
+
+    /*map<int, vector<tuple<int,int>>>::iterator it;
+    for(it = mapa.begin(); it != mapa.end(); it++) {
+        cout << "ponto: " << it->first << endl;
+        //for() {
+
+        // }
+    }*/
 }
 // **********************************************************************
 //
@@ -238,9 +260,9 @@ void init() {
     CriaMapaCurvas();
     CriaInstancias();
 
-    float d = 4.5;
-    Min = Ponto(-d, -(d - 1));
-    Max = Ponto(d, d - 1);
+    float d = 10;
+    Min = Ponto(-d, -d/3);
+    Max = Ponto(d, d/3);
 }
 // **********************************************************************
 //
