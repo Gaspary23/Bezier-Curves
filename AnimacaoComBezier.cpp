@@ -8,8 +8,6 @@
 // pinho@pucrs.br
 // **********************************************************************
 
-#include <omp.h>
-
 #include <cmath>
 #include <ctime>
 #include <fstream>
@@ -176,34 +174,64 @@ void CriaMapaCurvas() {
     }*/
 }
 // **********************************************************************
-//
+//  int escolheProxCurva(int i, int shift = 0)
+//      Escolhe a proxima curva que o jogador de indice i deve seguir
+//       shift: 0 -> curva aleatoria dentre as conectadas ao ponto de chegada
+//       shift: 1 -> proxima curva no vetor de curvas conectadas ao ponto de chegada
+//       shift: -1 -> curva anterior no vetor de curvas conectadas ao ponto de chegada
 // **********************************************************************
 int escolheProxCurva(int i, int shift = 0) {
     int ponto;
+    // Escolhe o ponto de saida ou entrada da curva em que o jogador esta,
+    //  dependendo do sentido de movimento
     if (Personagens[i].direcao == 1)
         ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).z;
     else if (Personagens[i].direcao == -1)
         ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).x;
 
+    // Vector local com as curvas conectadas ao ponto onde o jogador vai chegar
     vector<tuple<int, int>> curvas = mapa[ponto];
-    int new_id;
-    int size = curvas.size();
+    int id, new_id;
+    int size = curvas.size() - 1;
 
+    // Se nao houver shift, escolhe uma curva aleatoria
     if (shift == 0) {
-        new_id = rand() % size;
-    } else {
-        int id, nroAtual = Personagens[i].nroDaCurva;
+        int id1, id2;
+
+        // Encontra o id da curva atual no vetor de curvas conectadas ao ponto
+        //  para garantir que a proxima curva nao seja a mesma
+        for (id = 0; id < size; id++)
+            if (get<0>(curvas[id]) == Personagens[i].nroDaCurva)
+                break;
+        
+        /*
+        * Gera dois ids aleatorios dentro de intervalos definidos como:
+        *   id1 -> [0, id-1] 
+        *   id2 -> [id+1, size]
+        */
+        // Se o nro da curva atual for 0, id1 = 1 por convencao
+        id1 = id != 0 ? rand() % ((id - 1) + 1) : 1;
+        // Se o nro da curva atual for size, id2 = size - 1 por convencao
+        id2 = id != size ? (id + 1) + (rand() % (size - (id + 1) + 1)) : size - 1;
+        
+        // escolhe um dos ids aleatorios
+        int x = rand() % 2;
+        new_id = x == 0 ? id1 : id2;
+    } // Se houver shift, escolhe uma curva "adjacente"
+    else {  
+        // Encontra o id da proxima curva no vetor de curvas conectadas ao ponto
+        //  para garantir que a nova proxima curva nao seja a mesma
         for (id = 0; id < size; id++)
             if (get<0>(curvas[id]) == Personagens[i].proxCurva)
                 break;
 
+        // garante que a curva escolhida nao seja a mesma que o jogador ja esta
         new_id = id + shift;
-        new_id = new_id < 0 ? size - 1 : new_id > size - 1 ? 0 : new_id;
-
-        if (get<0>(curvas[new_id]) == nroAtual) {
+        new_id = new_id < 0 ? size : new_id > size ? 0 : new_id;
+        if (get<0>(curvas[new_id]) == Personagens[i].nroDaCurva) {
             new_id += shift;
-            new_id = new_id < 0 ? size - 1 : new_id > size - 1 ? 0 : new_id;
-        }        
+            new_id = new_id < 0 ? size : new_id > size ? 0 : new_id;
+        }
     }
 
     return get<0>(curvas[new_id]);
@@ -238,7 +266,7 @@ void CriaInstancias() {
     for (int i = 0; i < nInstancias; i++) {
         int id = rand() % nCurvas;
         Personagens[i] = InstanciaBZ(&Curvas[id], id, DesenhaMastro, velocidade);
-        escolheProxCurva(i);
+        Personagens[i].proxCurva = escolheProxCurva(i);
     }
 }
 // **********************************************************************
