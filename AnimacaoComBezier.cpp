@@ -319,13 +319,14 @@ void MovimentaPersonagens(float tempoDecorrido) {
 // **********************************************************************
 //
 // **********************************************************************
-void DesenhaPersonagens() {
+void DesenhaPersonagens(bool atualizaMain = false) {
     for (size_t i = 0; i < nInstancias; i++) {
         if (i == 0)
             defineCor(Green);
         else
             defineCor(Red);
         Personagens[i].desenha();
+        if (atualizaMain) break;
     }
 }
 // **********************************************************************
@@ -396,10 +397,21 @@ void keyboard(unsigned char key, int x, int y) {
             // Inverte a direcao do jogador principal
             Personagens[0].direcao = -Personagens[0].direcao;
             Personagens[0].proxCurva = escolheProxCurva(0);
+            Personagens[0].AtualizaPosicao(T2.getDeltaT());
+            DesenhaPersonagens(true);
             break;
         case 'e':
             // Alterna entre desenhar e nao desenhar os eixos
             desenha = !desenha;
+            break;
+        case 'f': 
+            // Vai para Full Screen
+            glutFullScreen();  
+            break;
+        case 'r':
+            // Reposiciona a janela
+            glutPositionWindow(50, 50);
+            glutReshapeWindow(700, 500);        
             break;
         case 't':
             ContaTempo(3);
@@ -419,6 +431,7 @@ void keyboard(unsigned char key, int x, int y) {
 //  void arrow_keys ( int a_keys, int x, int y )
 // **********************************************************************
 void arrow_keys(int a_keys, int x, int y) {
+    float vel;
     switch (a_keys) {
         case GLUT_KEY_LEFT:
             // Muda a proxima curva selecionada pelo personagem principal
@@ -428,13 +441,17 @@ void arrow_keys(int a_keys, int x, int y) {
             // Muda a proxima curva selecionada pelo personagem principal
             Personagens[0].proxCurva = escolheProxCurva(0, 1);
             break;
-        case GLUT_KEY_UP:      // Se pressionar UP
-            glutFullScreen();  // Vai para Full Screen
+        case GLUT_KEY_UP:    
+            // Aumenta a velocidade do personagem principal
+            vel = Personagens[0].Velocidade + 0.5;
+            vel = vel > 8 ? 8 : vel;
+            Personagens[0].Velocidade = vel;
             break;
-        case GLUT_KEY_DOWN:  // Se pressionar DOWN
-                             // Reposiciona a janela
-            glutPositionWindow(50, 50);
-            glutReshapeWindow(700, 500);
+        case GLUT_KEY_DOWN:
+            // Diminui a velocidade do personagem principal
+            vel = Personagens[0].Velocidade - 0.5;
+            vel = vel <= 0.5 ? 0.5 : vel;
+            Personagens[0].Velocidade = vel;
             break;
         default:
             break;
