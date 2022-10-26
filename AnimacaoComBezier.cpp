@@ -176,13 +176,11 @@ void CriaMapaCurvas() {
     }*/
 }
 // **********************************************************************
-//  int escolheProxCurva(int i, int shift = 0)
-//      Escolhe a proxima curva que o jogador de indice i deve seguir
-//       shift: 0 -> curva aleatoria dentre as conectadas ao ponto de chegada
-//       shift: 1 -> proxima curva no vetor de curvas conectadas ao ponto de chegada
-//       shift: -1 -> curva anterior no vetor de curvas conectadas ao ponto de chegada
+//  int pontoSaida (int i, int direcao)
+//      Encontra o ponto de saida da curva em que o personagem de indice
+//          i se encontra, usando sua direcao
 // **********************************************************************
-int escolheProxCurva(int i, int shift = 0) {
+int pontoSaida(int i, int direcao) {
     int ponto;
     // Escolhe o ponto de saida ou entrada da curva em que o jogador esta,
     //  dependendo do sentido de movimento
@@ -190,6 +188,19 @@ int escolheProxCurva(int i, int shift = 0) {
         ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).z;
     else if (Personagens[i].direcao == -1)
         ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).x;
+
+    return ponto;
+}
+// **********************************************************************
+//  int escolheProxCurva(int i, int shift = 0)
+//      Escolhe a proxima curva que o jogador de indice i deve seguir
+//       shift: 0 -> curva aleatoria dentre as conectadas ao ponto de chegada
+//       shift: 1 -> proxima curva no vetor de curvas conectadas ao ponto de chegada
+//       shift: -1 -> curva anterior no vetor de curvas conectadas ao ponto de chegada
+// **********************************************************************
+int escolheProxCurva(int i, int shift = 0) {
+    // Pega o indice do ponto de chegada da curva em que o jogador esta
+    int ponto = pontoSaida(i, Personagens[i].direcao);
 
     // Vector local com as curvas conectadas ao ponto onde o jogador vai chegar
     vector<tuple<int, int>> curvas = mapa[ponto];
@@ -240,26 +251,30 @@ int escolheProxCurva(int i, int shift = 0) {
     return get<0>(curvas[new_id]);
 }
 // **********************************************************************
-//
+//  void MudaCurva(int i)
+//      Muda a curva em que o jogador de indice i se encontra pela 
+//          proxima curva que foi escolhida
 // **********************************************************************
-void MudaCurvas(int i) {
-    int ponto;
-    if (Personagens[i].direcao == 1)
-        ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).z;
-    else if (Personagens[i].direcao == -1)
-        ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).x;
+void MudaCurva(int i) {
+    // Pega o indice do ponto de chegada da curva em que o jogador esta
+    int ponto = pontoSaida(i, Personagens[i].direcao);
 
+    // Atualiza as variaveis do personagem com a nova curva
     int prox = Personagens[i].proxCurva;
     Personagens[i].Curva = &Curvas[prox];
     Personagens[i].nroDaCurva = prox;
 
+    // Vector local com as curvas conectadas ao ponto onde o jogador vai chegar
     vector<tuple<int, int>> curvas = mapa[ponto];
-    int size = curvas.size() - 1;
     int pos;
-    for (pos = 0; pos < size + 1; pos++)
+    // Encontra o id da nova curva no vetor de curvas conectadas ao ponto
+    //  para verificar se ela comeca ou termina naquele ponto
+    for (pos = 0; pos < curvas.size(); pos++)
         if (get<0>(curvas[pos]) == Personagens[i].nroDaCurva)
             break;
 
+    // Se a nova curva comeca no ponto, o jogador deve seguir o sentido
+    //  contrario ao da curva e vice-versa
     Personagens[i].direcao = get<1>(curvas[pos]) == 0 ? 1 : -1;
     Personagens[i].tAtual = get<1>(curvas[pos]);
 
@@ -312,7 +327,7 @@ void MovimentaPersonagens(float tempoDecorrido) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
         }
         if (Personagens[i].tAtual >= 1.0 || Personagens[i].tAtual <= 0.0) {
-            MudaCurvas(i);
+            MudaCurva(i);
         }
     }
 }
