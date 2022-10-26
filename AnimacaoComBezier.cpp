@@ -13,9 +13,10 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <tuple>
 #include <vector>
-#include <omp.h>
-#include <chrono>
+#include <algorithm>
+#include <random>
 
 using namespace std;
 
@@ -44,19 +45,21 @@ Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
 
-unsigned int nCurvas;
-Bezier Curvas[20];
-map<int, vector<int>> mapa;
+const unsigned int nCurvas = 13;
+Bezier Curvas[nCurvas];
+// chave: indice do ponto de controle
+// Valor: indice da curva e direcao
+map<int, vector<tuple<int, int>>> mapa;
 
-const unsigned int nInstancias = 1;
+const unsigned int nInstancias = 10;
 InstanciaBZ Personagens[nInstancias];
 float velocidade = 3;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
-bool desenha = false, movimenta = false;
+bool desenha = false, movimenta = true;
 
-Poligono Triangulo, PontosDeControle, auxCurvas;
+Poligono Triangulo, PontosDeControle, CurvasDeControle;
 float angulo = 0.0;
 double nFrames = 0;
 double TempoTotal = 0;
@@ -128,16 +131,15 @@ void DesenhaMastro() {
 void CarregaModelos() {
     Triangulo.LePoligono("tests/Triangulo", false);
     PontosDeControle.LePoligono("tests/PontosDeControle", false);
-    auxCurvas.LePoligono("tests/Curvas", true);
+    CurvasDeControle.LePoligono("tests/Curvas", true);
 }
 // **********************************************************************
 //
 // **********************************************************************
 void CriaCurvas() {
-    nCurvas = auxCurvas.getNVertices();  // topo do txt
     for (size_t i; i < nCurvas; i++) {
         Ponto ponto[3];
-        Ponto aux = auxCurvas.getVertice(i);
+        Ponto aux = CurvasDeControle.getVertice(i);
 
         ponto[0] = PontosDeControle.getVertice(aux.x);
         ponto[1] = PontosDeControle.getVertice(aux.y);
@@ -150,62 +152,138 @@ void CriaCurvas() {
 // **********************************************************************
 void CriaMapaCurvas() {
     for (size_t i = 0; i < nCurvas; i++) {
-        Ponto aux = auxCurvas.getVertice(i);
+        Ponto aux = CurvasDeControle.getVertice(i);
         int inicial = aux.x, final = aux.z;
 
         for (int j = 0; j < 2; j++) {
             int ponto = j == 0 ? inicial : final;
             if (mapa.find(ponto) != mapa.end()) {
-                mapa[ponto].push_back(i);
+                mapa[ponto].push_back(tuple(i, j));
             } else {
-                vector<int> *vec = &mapa[ponto];
-                vec->push_back(i);
+                vector<tuple<int, int>>* vec = &mapa[ponto];
+                vec->push_back(tuple(i, j));
             }
         }
     }
+
+    /*map<int, vector<tuple<int,int>>>::iterator it;
+    for(it = mapa.begin(); it != mapa.end(); it++) {
+        cout << "ponto: " << it->first << endl;
+        for (size_t i = 0; i < it->second.size(); ++i) {
+            cout << "  curva: " << get<0>(it->second[i]) << " ";
+            cout << "  t: " << get<1>(it->second[i]) << endl;
+        }
+    }*/
+}
+// **********************************************************************
+//  int escolheProxCurva(int i, int shift = 0)
+//      Escolhe a proxima curva que o jogador de indice i deve seguir
+//       shift: 0 -> curva aleatoria dentre as conectadas ao ponto de chegada
+//       shift: 1 -> proxima curva no vetor de curvas conectadas ao ponto de chegada
+//       shift: -1 -> curva anterior no vetor de curvas conectadas ao ponto de chegada
+// **********************************************************************
+int escolheProxCurva(int i, int shift = 0) {
+    int ponto;
+    // Escolhe o ponto de saida ou entrada da curva em que o jogador esta,
+    //  dependendo do sentido de movimento
+    if (Personagens[i].direcao == 1)
+        ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).z;
+    else if (Personagens[i].direcao == -1)
+        ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).x;
+
+    // Vector local com as curvas conectadas ao ponto onde o jogador vai chegar
+    vector<tuple<int, int>> curvas = mapa[ponto];
+    int id, new_id;
+    int size = curvas.size() - 1;
+
+    // Se nao houver shift, escolhe uma curva aleatoria
+    if (shift == 0) {
+        int id1, id2;
+
+        // Encontra o id da curva atual no vetor de curvas conectadas ao ponto
+        //  para garantir que a proxima curva nao seja a mesma
+        for (id = 0; id < size + 1; id++)
+            if (get<0>(curvas[id]) == Personagens[i].nroDaCurva)
+                break;
+        
+        /*
+        * Gera dois ids aleatorios dentro de intervalos definidos como:
+        *   id1 -> [0, id-1] 
+        *   id2 -> [id+1, size]
+        */
+        // Se o nro da curva atual for 0, id1 = 1 por convencao
+        id1 = id != 0 ? rand() % ((id - 1) + 1) : 1;
+        // Se o nro da curva atual for size, id2 = size - 1 por convencao
+        id2 = id != size ? (id + 1) + (rand() % (size - (id + 1) + 1)) : size - 1;
+        
+        // escolhe um dos ids aleatorios
+        int x = rand() % 2;
+        new_id = x == 0 ? id1 : id2;
+    } // Se houver shift, escolhe uma curva "adjacente"
+    else {  
+        // Encontra o id da proxima curva no vetor de curvas conectadas ao ponto
+        //  para garantir que a nova proxima curva nao seja a mesma
+        for (id = 0; id < size + 1; id++)
+            if (get<0>(curvas[id]) == Personagens[i].proxCurva)
+                break;
+
+        // garante que a curva escolhida nao seja a mesma que o jogador ja esta
+        //  e que o curva esteja nos limites logicos do vetor
+        new_id = id + shift;
+        new_id = new_id < 0 ? size : new_id > size ? 0 : new_id;
+        if (get<0>(curvas[new_id]) == Personagens[i].nroDaCurva) {
+            new_id += shift;
+            new_id = new_id < 0 ? size : new_id > size ? 0 : new_id;
+        }
+    }
+
+    return get<0>(curvas[new_id]);
 }
 // **********************************************************************
 //
 // **********************************************************************
-int escolheProxCurva(int i, int shift = 0) {
+void MudaCurvas(int i) {
     int ponto;
-    
-    if(Personagens[i].direcao == 1)
-        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).z;
+    if (Personagens[i].direcao == 1)
+        ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).z;
     else if (Personagens[i].direcao == -1)
-        ponto = auxCurvas.getVertice(Personagens[i].nroDaCurva).x;
+        ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).x;
 
-    vector<int> curvas = mapa[ponto];
-    int r;
-    int n = curvas.size();
+    int prox = Personagens[i].proxCurva;
+    Personagens[i].Curva = &Curvas[prox];
+    Personagens[i].nroDaCurva = prox;
 
-    if (shift == 0) {
-        r = rand() % n;
-    } else {
-        int pos;
-        for (pos = 0; pos < n; pos++)
-            if (curvas[pos] == Personagens[i].nroDaCurva)
-                break;
-        
-        int delta = pos + shift;
-        r = delta > n - 1 ? 0 : delta < 0 ? n - 1 : delta;
+    vector<tuple<int, int>> curvas = mapa[ponto];
+    int size = curvas.size() - 1;
+    int pos;
+    for (pos = 0; pos < size + 1; pos++)
+        if (get<0>(curvas[pos]) == Personagens[i].nroDaCurva)
+            break;
 
-        cout << "n: " << n << endl;
-        cout << "pos: " << pos << endl;
-        cout << "delta: " << delta << " r: " << r << endl;
-        for (int j = 0; j < n; j++) {
-            cout << "Curva: " << curvas[j] << ", ";
-        }cout << "\n\n" << endl;
-    }
+    Personagens[i].direcao = get<1>(curvas[pos]) == 0 ? 1 : -1;
+    Personagens[i].tAtual = get<1>(curvas[pos]);
 
-    return curvas[r];
+    Personagens[i].proxCurva = escolheProxCurva(i);
 }
 // **********************************************************************
 // Esta funcao deve instanciar todos os personagens do cenario
 // **********************************************************************
 void CriaInstancias() {
-    for (int i = 0; i < nInstancias; i++) {
-        Personagens[i] = InstanciaBZ(&Curvas[i], i, DesenhaMastro, velocidade);
+    // Cria e popula um vetor com todos os indices das curvas
+    vector<int> indiceCurvas;
+    for (size_t i = 0; i < nCurvas; i++) {
+        indiceCurvas.push_back(i);
+    }
+    // Cria um geador unifrome de bits para embaralhar o vetor
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(indiceCurvas.begin(), indiceCurvas.end(), g);
+
+    // Cada jogador comeca em uma curva aleatoria, escolhida do vetor embaralhado
+    //  na posicao equivalente a sua, para que nao haja dois jogadores na mesma curva
+    for (size_t i = 0; i < nInstancias; i++) {
+        int id = indiceCurvas[i];
+        Personagens[i] = InstanciaBZ(&Curvas[id], id, DesenhaMastro, velocidade);
         Personagens[i].proxCurva = escolheProxCurva(i);
     }
 }
@@ -221,27 +299,32 @@ void init() {
     CriaMapaCurvas();
     CriaInstancias();
 
-    float d = 4.5;
-    Min = Ponto(-d, -(d - 1));
-    Max = Ponto(d, d - 1);
+    float d = 10;
+    Min = Ponto(-d, -d / 3);
+    Max = Ponto(d, d / 3);
 }
 // **********************************************************************
 //
 // **********************************************************************
-void DesenhaPersonagens(float tempoDecorrido) {
-    int i;    
-    #pragma omp parallel for schedule(dynamic) private(i)
-    for (i = 0; i < nInstancias; i++) {
+void MovimentaPersonagens(float tempoDecorrido) {
+    for (size_t i = 0; i < nInstancias; i++) {
         if (i != 0 || movimenta) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
         }
-        if (Personagens[i].nroDaCurva == Personagens[i].proxCurva) {
-            Personagens[i].Curva = &Curvas[Personagens[i].proxCurva];
-            Personagens[i].proxCurva = escolheProxCurva(i);
+        if (Personagens[i].tAtual >= 1.0 || Personagens[i].tAtual <= 0.0) {
+            MudaCurvas(i);
         }
-        
-        if(i == 0) defineCor(Green);
-        else defineCor(Red);
+    }
+}
+// **********************************************************************
+//
+// **********************************************************************
+void DesenhaPersonagens() {
+    for (size_t i = 0; i < nInstancias; i++) {
+        if (i == 0)
+            defineCor(Green);
+        else
+            defineCor(Red);
         Personagens[i].desenha();
     }
 }
@@ -249,13 +332,10 @@ void DesenhaPersonagens(float tempoDecorrido) {
 //
 // **********************************************************************
 void DesenhaCurvas() {
-    int i;
-    #pragma omp parallel for schedule(dynamic) private(i)
-    for (i = 0; i < nCurvas; i++) {
+    for (size_t i = 0; i < nCurvas; i++) {
         if (Personagens[0].nroDaCurva == i || Personagens[0].proxCurva == i) {
-            glLineWidth(4);
-        }
-        else
+            glLineWidth(5);
+        } else
             glLineWidth(2);
         Curvas[i].Traca();
     }
@@ -273,16 +353,16 @@ void display(void) {
 
     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Coloque aqui as chamadas das rotinas que desenham os objetos
-    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<s
     if (desenha) {
         glLineWidth(1);
         glColor3f(0, 0, 0);  // R, G, B  [0..1]
         DesenhaEixos();
     }
 
+    MovimentaPersonagens(T2.getDeltaT());
     glLineWidth(2);
-    DesenhaPersonagens(T2.getDeltaT());
+    DesenhaPersonagens();
 
     DesenhaCurvas();
 
@@ -290,8 +370,8 @@ void display(void) {
 }
 // **********************************************************************
 // ContaTempo(double tempo)
-//      conta um certo n�mero de segundos e informa quanto frames
-// se passaram neste per�odo.
+//      conta um certo numero de segundos e informa quanto frames
+// se passaram neste periodo.
 // **********************************************************************
 void ContaTempo(double tempo) {
     Temporizador T;
@@ -312,13 +392,20 @@ void ContaTempo(double tempo) {
 // **********************************************************************
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
+        case 'd':
+            // Inverte a direcao do jogador principal
+            Personagens[0].direcao = -Personagens[0].direcao;
+            Personagens[0].proxCurva = escolheProxCurva(0);
+            break;
         case 'e':
+            // Alterna entre desenhar e nao desenhar os eixos
             desenha = !desenha;
             break;
         case 't':
             ContaTempo(3);
             break;
         case ' ':
+            // Controla se o jogador principal se move ou nao
             movimenta = !movimenta;
             break;
         case 27:      // Termina o programa qdo
@@ -334,9 +421,11 @@ void keyboard(unsigned char key, int x, int y) {
 void arrow_keys(int a_keys, int x, int y) {
     switch (a_keys) {
         case GLUT_KEY_LEFT:
+            // Muda a proxima curva selecionada pelo personagem principal
             Personagens[0].proxCurva = escolheProxCurva(0, -1);
             break;
         case GLUT_KEY_RIGHT:
+            // Muda a proxima curva selecionada pelo personagem principal
             Personagens[0].proxCurva = escolheProxCurva(0, 1);
             break;
         case GLUT_KEY_UP:      // Se pressionar UP

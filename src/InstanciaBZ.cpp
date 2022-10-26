@@ -8,6 +8,7 @@
 
 #include "../include/InstanciaBZ.h"
 #include "../include/Ponto.h"
+#include "../include/Bezier.h"
 
 // ***********************************************************
 //  void InstanciaPonto(Ponto3D *p, Ponto3D *out)
@@ -52,17 +53,16 @@ InstanciaBZ::InstanciaBZ() {
 }
 
 InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) {
-    Posicao = Ponto(0, 0, 0);
     Escala = Ponto(0.5, 0.5, 0.5);
 
     Curva = C;
-    tAtual = 0;
-    direcao = 1;
+    tAtual = 0.5; // Inicia no meio da curva
+    Posicao = C->Calcula(tAtual);
 
+    direcao = 1; // deixar aleatorio (?)
     nroDaCurva = nro;
     modelo = *mod;
     Velocidade = velocidade;
-    Rotacao = 0;
 }
 
 void InstanciaBZ::desenha() {
@@ -92,7 +92,7 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
     // calcula a nova posicao do personagem
     float distanciaPercorrida = Velocidade * tempoDecorrido;
     float deltaT = direcao * Curva->CalculaT(distanciaPercorrida);
-    tAtual +=  deltaT;
+    tAtual += deltaT;
 
     // atualiza a posicao do personagem
     Posicao = Curva->Calcula(tAtual);
@@ -105,16 +105,4 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
 
     // atualiza a rotacao do personagem
     Rotacao = v1.y >= 0 ?  angulo : -angulo;
-
-    // verifica se o personagem chegou ao fim da curva
-    if (tAtual >= 1.0) {
-        tAtual = 1.0;
-        direcao = -1;
-        nroDaCurva = proxCurva;
-    }
-    else if (tAtual <= 0.0) {
-        tAtual = 0.0;
-        direcao = 1;
-        nroDaCurva = proxCurva;
-    }
 }
