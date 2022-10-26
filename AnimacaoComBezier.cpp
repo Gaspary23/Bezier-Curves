@@ -51,7 +51,7 @@ Bezier Curvas[nCurvas];
 // Valor: indice da curva e direcao
 map<int, vector<tuple<int, int>>> mapa;
 
-const unsigned int nInstancias = 1;
+const unsigned int nInstancias = 10;
 InstanciaBZ Personagens[nInstancias];
 float velocidade = 3;
 
@@ -202,7 +202,7 @@ int escolheProxCurva(int i, int shift = 0) {
 
         // Encontra o id da curva atual no vetor de curvas conectadas ao ponto
         //  para garantir que a proxima curva nao seja a mesma
-        for (id = 0; id < size; id++)
+        for (id = 0; id < size + 1; id++)
             if (get<0>(curvas[id]) == Personagens[i].nroDaCurva)
                 break;
         
@@ -223,7 +223,7 @@ int escolheProxCurva(int i, int shift = 0) {
     else {  
         // Encontra o id da proxima curva no vetor de curvas conectadas ao ponto
         //  para garantir que a nova proxima curva nao seja a mesma
-        for (id = 0; id < size; id++)
+        for (id = 0; id < size + 1; id++)
             if (get<0>(curvas[id]) == Personagens[i].proxCurva)
                 break;
 
@@ -243,24 +243,27 @@ int escolheProxCurva(int i, int shift = 0) {
 //
 // **********************************************************************
 void MudaCurvas(int i) {
-    Personagens[i].nroDaCurva = Personagens[i].proxCurva;
-
     int ponto;
     if (Personagens[i].direcao == 1)
         ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).z;
     else if (Personagens[i].direcao == -1)
         ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).x;
-    vector<tuple<int, int>> curvas = mapa[ponto];
 
-    int r;
-    int n = curvas.size();
+    int prox = Personagens[i].proxCurva;
+    Personagens[i].Curva = &Curvas[prox];
+    Personagens[i].nroDaCurva = prox;
+
+    vector<tuple<int, int>> curvas = mapa[ponto];
+    int size = curvas.size() - 1;
     int pos;
-    for (pos = 0; pos < n; pos++)
+    for (pos = 0; pos < size + 1; pos++)
         if (get<0>(curvas[pos]) == Personagens[i].nroDaCurva)
             break;
 
-    Personagens[i].direcao = get<1>(curvas[r]) == 0 ? 1 : -1;
-    Personagens[i].tAtual = get<1>(curvas[r]);
+    Personagens[i].direcao = get<1>(curvas[pos]) == 0 ? 1 : -1;
+    Personagens[i].tAtual = get<1>(curvas[pos]);
+
+    Personagens[i].proxCurva = escolheProxCurva(i);
 }
 // **********************************************************************
 // Esta funcao deve instanciar todos os personagens do cenario
@@ -308,9 +311,8 @@ void MovimentaPersonagens(float tempoDecorrido) {
         if (i != 0 || movimenta) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
         }
-        if (Personagens[i].tAtual > 0.9 || Personagens[i].tAtual < 0.1) {
+        if (Personagens[i].tAtual >= 1.0 || Personagens[i].tAtual <= 0.0) {
             MudaCurvas(i);
-            Personagens[i].proxCurva = escolheProxCurva(i);
         }
     }
 }
@@ -332,7 +334,7 @@ void DesenhaPersonagens() {
 void DesenhaCurvas() {
     for (size_t i = 0; i < nCurvas; i++) {
         if (Personagens[0].nroDaCurva == i || Personagens[0].proxCurva == i) {
-            glLineWidth(4);
+            glLineWidth(5);
         } else
             glLineWidth(2);
         Curvas[i].Traca();
@@ -368,8 +370,8 @@ void display(void) {
 }
 // **********************************************************************
 // ContaTempo(double tempo)
-//      conta um certo n�mero de segundos e informa quanto frames
-// se passaram neste per�odo.
+//      conta um certo numero de segundos e informa quanto frames
+// se passaram neste periodo.
 // **********************************************************************
 void ContaTempo(double tempo) {
     Temporizador T;
@@ -391,17 +393,19 @@ void ContaTempo(double tempo) {
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 'd':
-            // inverte a direcao do player
+            // Inverte a direcao do jogador principal
             Personagens[0].direcao = -Personagens[0].direcao;
             Personagens[0].proxCurva = escolheProxCurva(0);
             break;
         case 'e':
+            // Alterna entre desenhar e nao desenhar os eixos
             desenha = !desenha;
             break;
         case 't':
             ContaTempo(3);
             break;
         case ' ':
+            // Controla se o jogador principal se move ou nao
             movimenta = !movimenta;
             break;
         case 27:      // Termina o programa qdo
@@ -417,9 +421,11 @@ void keyboard(unsigned char key, int x, int y) {
 void arrow_keys(int a_keys, int x, int y) {
     switch (a_keys) {
         case GLUT_KEY_LEFT:
+            // Muda a proxima curva selecionada pelo personagem principal
             Personagens[0].proxCurva = escolheProxCurva(0, -1);
             break;
         case GLUT_KEY_RIGHT:
+            // Muda a proxima curva selecionada pelo personagem principal
             Personagens[0].proxCurva = escolheProxCurva(0, 1);
             break;
         case GLUT_KEY_UP:      // Se pressionar UP

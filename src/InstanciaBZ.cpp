@@ -92,7 +92,7 @@ void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
     // calcula a nova posicao do personagem
     float distanciaPercorrida = Velocidade * tempoDecorrido;
     float deltaT = direcao * Curva->CalculaT(distanciaPercorrida);
-    tAtual +=  deltaT;
+    tAtual += deltaT;
 
     // atualiza a posicao do personagem
     Posicao = Curva->Calcula(tAtual);
