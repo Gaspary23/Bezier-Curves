@@ -15,6 +15,8 @@
 #include <map>
 #include <tuple>
 #include <vector>
+#include <algorithm>
+#include <random>
 
 using namespace std;
 
@@ -226,6 +228,7 @@ int escolheProxCurva(int i, int shift = 0) {
                 break;
 
         // garante que a curva escolhida nao seja a mesma que o jogador ja esta
+        //  e que o curva esteja nos limites logicos do vetor
         new_id = id + shift;
         new_id = new_id < 0 ? size : new_id > size ? 0 : new_id;
         if (get<0>(curvas[new_id]) == Personagens[i].nroDaCurva) {
@@ -263,8 +266,20 @@ void MudaCurvas(int i) {
 // Esta funcao deve instanciar todos os personagens do cenario
 // **********************************************************************
 void CriaInstancias() {
-    for (int i = 0; i < nInstancias; i++) {
-        int id = rand() % nCurvas;
+    // Cria e popula um vetor com todos os indices das curvas
+    vector<int> indiceCurvas;
+    for (size_t i = 0; i < nCurvas; i++) {
+        indiceCurvas.push_back(i);
+    }
+    // Cria um geador unifrome de bits para embaralhar o vetor
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(indiceCurvas.begin(), indiceCurvas.end(), g);
+
+    // Cada jogador comeca em uma curva aleatoria, escolhida do vetor embaralhado
+    //  na posicao equivalente a sua, para que nao haja dois jogadores na mesma curva
+    for (size_t i = 0; i < nInstancias; i++) {
+        int id = indiceCurvas[i];
         Personagens[i] = InstanciaBZ(&Curvas[id], id, DesenhaMastro, velocidade);
         Personagens[i].proxCurva = escolheProxCurva(i);
     }
