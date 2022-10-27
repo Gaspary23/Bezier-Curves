@@ -59,7 +59,7 @@ float velocidade = 3;
 Ponto Min, Max;
 bool desenha = false, movimenta = true;
 
-Poligono Triangulo, PontosDeControle, CurvasDeControle;
+Poligono Triangulo, PontosDeControle, CurvasDeControle, CampoDeVisao, Envelope;
 float angulo = 0.0;
 double nFrames = 0;
 double TempoTotal = 0;
@@ -330,6 +330,99 @@ void MovimentaPersonagens(float tempoDecorrido) {
             MudaCurva(i);
         }
     }
+}
+// **********************************************************************
+//
+// **********************************************************************
+void ChecaEV(){
+for(int i = 1; i <= nInstancias; i++){
+    if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
+     bool aux = envelope(i);
+     if(aux == true){
+        //Colisão!
+     }
+    }
+}
+}
+// **********************************************************************
+//
+// **********************************************************************
+Poligono CriaEnvelope (Ponto init) {
+    Ponto vetor = Ponto(1, 0, 0);
+
+    Envelope.insereVertice(init);
+
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
+
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
+
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
+
+    return Envelope;
+}
+// **********************************************************************
+//
+// **********************************************************************
+Poligono PosicionaEnvelope(Poligono *envelope) {
+    float esquerda, direita, cima, baixo;
+    for (int i = 0; i < CampoDeVisao.getNVertices(); i++) {
+        if (i == 0) {
+            esquerda = CampoDeVisao.getVertice(i).x;
+            direita = CampoDeVisao.getVertice(i).x;
+            cima = CampoDeVisao.getVertice(i).y;
+            baixo = CampoDeVisao.getVertice(i).y;
+        } else {
+            if (CampoDeVisao.getVertice(i).x < esquerda) {
+                esquerda = CampoDeVisao.getVertice(i).x;
+            }
+            if (CampoDeVisao.getVertice(i).x > direita) {
+                direita = CampoDeVisao.getVertice(i).x;
+            }
+            if (CampoDeVisao.getVertice(i).y < baixo) {
+                baixo = CampoDeVisao.getVertice(i).y;
+            }
+            if (CampoDeVisao.getVertice(i).y > cima) {
+                cima = CampoDeVisao.getVertice(i).y;
+            }
+        }
+    }
+    envelope->alteraVertice(0, Ponto(esquerda, baixo, 0));
+    envelope->alteraVertice(1, Ponto(direita, baixo, 0));
+    envelope->alteraVertice(2, Ponto(direita, cima, 0));
+    envelope->alteraVertice(3, Ponto(esquerda, cima, 0));
+    return *envelope;
+}
+
+// **********************************************************************
+// algoritmo de colisão:
+// **********************************************************************
+bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
+    if (min1.x <= max2.x && max1.x >= min2.x &&
+        min1.y <= max2.y && max1.y >= min2.y) {
+        return true;
+    }
+    return false;
+}
+// **********************************************************************
+//
+// **********************************************************************
+bool envelope(int IndiceInimigo) {
+Poligono PersonagemEnv = CriaEnvelope(Personagens[0].Posicao);
+Poligono Personagem = PosicionaEnvelope(&PersonagemEnv);
+
+Poligono InimigoEnv = CriaEnvelope(Personagens[IndiceInimigo].Posicao);
+Poligono Inimigo =  PosicionaEnvelope(&InimigoEnv);
+
+Ponto min1 = PersonagemEnv.getVertice(0);
+Ponto max1 = PersonagemEnv.getVertice(2);
+Ponto min2 = InimigoEnv.getVertice(0); 
+Ponto max2 = InimigoEnv.getVertice(2);
+
+bool aux = colide(min1,max1,min2,max2);
+return aux;
 }
 // **********************************************************************
 //
