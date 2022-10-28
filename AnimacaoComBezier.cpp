@@ -336,18 +336,19 @@ void MovimentaPersonagens(float tempoDecorrido) {
 // **********************************************************************
 Poligono CriaEnvelope(Ponto ref) {
 
-   if(ref == Personagens[0].Posicao){
+    Ponto vetor = Ponto(1, 0, 0);
+   if(ref == Personagens[0].Posicao){    
     //cout << "Entrei no envelope do Jogador" << endl;
     Envelope.insereVertice(ref);
 
-    ref.rotacionaZ(90);
-    Envelope.insereVertice(ref);
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
 
-    ref.rotacionaZ(90);
-    Envelope.insereVertice(ref);
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
 
-    ref.rotacionaZ(90);
-    Envelope.insereVertice(ref);
+    vetor.rotacionaZ(90);
+    Envelope.insereVertice(vetor);
 
     return Envelope;
     }
@@ -356,14 +357,14 @@ Poligono CriaEnvelope(Ponto ref) {
     //cout << "Entrei no envelope do Inimigo" << endl;
     Envelope2.insereVertice(ref);
 
-    ref.rotacionaZ(90);
-    Envelope2.insereVertice(ref);
+    vetor.rotacionaZ(90);
+    Envelope2.insereVertice(vetor);
 
-    ref.rotacionaZ(90);
-    Envelope2.insereVertice(ref);
+    vetor.rotacionaZ(90);
+    Envelope2.insereVertice(vetor);
 
-    ref.rotacionaZ(90);
-    Envelope2.insereVertice(ref);
+    vetor.rotacionaZ(90);
+    Envelope2.insereVertice(vetor);
 
     return Envelope2;
    }
