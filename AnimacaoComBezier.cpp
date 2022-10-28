@@ -59,7 +59,7 @@ float velocidade = 3;
 Ponto Min, Max;
 bool desenha = false, movimenta = true;
 
-Poligono Triangulo, PontosDeControle, CurvasDeControle, CampoDeVisao, Envelope;
+Poligono Triangulo, PontosDeControle, CurvasDeControle, Aux, Envelope, Envelope2;
 float angulo = 0.0;
 double nFrames = 0;
 double TempoTotal = 0;
@@ -158,10 +158,10 @@ void CriaMapaCurvas() {
         for (int j = 0; j < 2; j++) {
             int ponto = j == 0 ? inicial : final;
             if (mapa.find(ponto) != mapa.end()) {
-                mapa[ponto].push_back(tuple(i, j));
+                mapa[ponto].push_back(make_tuple(i, j));
             } else {
                 vector<tuple<int, int>>* vec = &mapa[ponto];
-                vec->push_back(tuple(i, j));
+                vec->push_back(make_tuple(i, j));
             }
         }
     }
@@ -334,65 +334,78 @@ void MovimentaPersonagens(float tempoDecorrido) {
 // **********************************************************************
 //
 // **********************************************************************
-void ChecaEV(){
-for(int i = 1; i <= nInstancias; i++){
-    if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
-     bool aux = envelope(i);
-     if(aux == true){
-        //Colisão!
-     }
-    }
-}
-}
-// **********************************************************************
-//
-// **********************************************************************
-Poligono CriaEnvelope (Ponto init) {
-    Ponto vetor = Ponto(1, 0, 0);
+Poligono CriaEnvelope(Ponto ref) {
 
-    Envelope.insereVertice(init);
+   if(ref == Personagens[0].Posicao){
+    //cout << "Entrei no envelope do Jogador" << endl;
+    Envelope.insereVertice(ref);
 
-    vetor.rotacionaZ(90);
-    Envelope.insereVertice(vetor);
+    ref.rotacionaZ(90);
+    Envelope.insereVertice(ref);
 
-    vetor.rotacionaZ(90);
-    Envelope.insereVertice(vetor);
+    ref.rotacionaZ(90);
+    Envelope.insereVertice(ref);
 
-    vetor.rotacionaZ(90);
-    Envelope.insereVertice(vetor);
+    ref.rotacionaZ(90);
+    Envelope.insereVertice(ref);
 
     return Envelope;
+    }
+
+   else{
+    //cout << "Entrei no envelope do Inimigo" << endl;
+    Envelope2.insereVertice(ref);
+
+    ref.rotacionaZ(90);
+    Envelope2.insereVertice(ref);
+
+    ref.rotacionaZ(90);
+    Envelope2.insereVertice(ref);
+
+    ref.rotacionaZ(90);
+    Envelope2.insereVertice(ref);
+
+    return Envelope2;
+   }
 }
 // **********************************************************************
 //
 // **********************************************************************
-Poligono PosicionaEnvelope(Poligono *envelope) {
+Poligono PosicionaEnvelope(Ponto referencia, Poligono *envelope, Poligono *aux) {
+    Ponto sup = referencia;
+    aux->insereVertice(Ponto((sup.x-1),(sup.y-0.8),0));
+    aux->insereVertice(Ponto((sup.x-1),(sup.y+0.8),0));
+    aux->insereVertice(Ponto((sup.x),(sup.y),0));
+    Poligono Triangulo = *aux;
+
     float esquerda, direita, cima, baixo;
-    for (int i = 0; i < CampoDeVisao.getNVertices(); i++) {
+    for (int i = 0; i < Triangulo.getNVertices(); i++) {
         if (i == 0) {
-            esquerda = CampoDeVisao.getVertice(i).x;
-            direita = CampoDeVisao.getVertice(i).x;
-            cima = CampoDeVisao.getVertice(i).y;
-            baixo = CampoDeVisao.getVertice(i).y;
+            esquerda = Triangulo.getVertice(i).x;
+            direita = Triangulo.getVertice(i).x;
+            cima = Triangulo.getVertice(i).y;
+            baixo = Triangulo.getVertice(i).y;
         } else {
-            if (CampoDeVisao.getVertice(i).x < esquerda) {
-                esquerda = CampoDeVisao.getVertice(i).x;
+            if (Triangulo.getVertice(i).x < esquerda) {
+                esquerda = Triangulo.getVertice(i).x;
             }
-            if (CampoDeVisao.getVertice(i).x > direita) {
-                direita = CampoDeVisao.getVertice(i).x;
+            if (Triangulo.getVertice(i).x > direita) {
+                direita = Triangulo.getVertice(i).x;
             }
-            if (CampoDeVisao.getVertice(i).y < baixo) {
-                baixo = CampoDeVisao.getVertice(i).y;
+            if (Triangulo.getVertice(i).y < baixo) {
+                baixo = Triangulo.getVertice(i).y;
             }
-            if (CampoDeVisao.getVertice(i).y > cima) {
-                cima = CampoDeVisao.getVertice(i).y;
+            if (Triangulo.getVertice(i).y > cima) {
+                cima = Triangulo.getVertice(i).y;
             }
         }
     }
+
     envelope->alteraVertice(0, Ponto(esquerda, baixo, 0));
     envelope->alteraVertice(1, Ponto(direita, baixo, 0));
     envelope->alteraVertice(2, Ponto(direita, cima, 0));
     envelope->alteraVertice(3, Ponto(esquerda, cima, 0));
+
     return *envelope;
 }
 
@@ -400,8 +413,15 @@ Poligono PosicionaEnvelope(Poligono *envelope) {
 // algoritmo de colisão:
 // **********************************************************************
 bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
-    if (min1.x <= max2.x && max1.x >= min2.x &&
-        min1.y <= max2.y && max1.y >= min2.y) {
+    if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
+        cout << " min1.x = " << min1.x<< endl;
+        cout << " min1.y = " << min1.y<< endl;
+        cout << " max1.x = " << max1.x<< endl;
+        cout << " max1.y = " << max1.y<< endl;
+        cout << " min2.x = " << min2.x<< endl;
+        cout << " min2.y = " << min2.y<< endl;  
+        cout << " max2.x = " << max2.x<< endl;
+        cout << " max2.y = " << max2.y<< endl;  
         return true;
     }
     return false;
@@ -409,12 +429,27 @@ bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
 // **********************************************************************
 //
 // **********************************************************************
-bool envelope(int IndiceInimigo) {
-Poligono PersonagemEnv = CriaEnvelope(Personagens[0].Posicao);
-Poligono Personagem = PosicionaEnvelope(&PersonagemEnv);
+int o = 0;
+bool testeDeColisao(int IndiceInimigo) {
+    // cout << "Testando Colisão com" << IndiceInimigo << endl;
 
+Poligono PersonagemEnv = CriaEnvelope(Personagens[0].Posicao);
 Poligono InimigoEnv = CriaEnvelope(Personagens[IndiceInimigo].Posicao);
-Poligono Inimigo =  PosicionaEnvelope(&InimigoEnv);
+Poligono Personagem = PosicionaEnvelope(Personagens[0].Posicao, &PersonagemEnv, &Aux);
+Poligono Inimigo =  PosicionaEnvelope(Personagens[IndiceInimigo].Posicao, &InimigoEnv, &Aux);
+
+if(o<1){
+//cout << "Posicao Inicial do personagem = " << Personagens[0].Posicao.x << Personagens[0].Posicao.y << endl;
+//cout << "Posicao Inicial do inimigo = " << Personagens[IndiceInimigo].Posicao.x << Personagens[IndiceInimigo].Posicao.y << endl;
+for (int i =0; i<=3; i++){
+    cout << "vertice " << i << " (x) do jogador = " << PersonagemEnv.getVertice(i).x << endl; 
+    cout << "vertice " << i << " (y) do jogador = " << PersonagemEnv.getVertice(i).y << endl; 
+    cout << "vertice " << i << " (x) do inimigo = " << InimigoEnv.getVertice(i).x << endl; 
+    cout << "vertice " << i << " (y) do inimigo = " << InimigoEnv.getVertice(i).y << endl; 
+}
+o++;
+}
+
 
 Ponto min1 = PersonagemEnv.getVertice(0);
 Ponto max1 = PersonagemEnv.getVertice(2);
@@ -423,6 +458,20 @@ Ponto max2 = InimigoEnv.getVertice(2);
 
 bool aux = colide(min1,max1,min2,max2);
 return aux;
+}
+// **********************************************************************
+//
+// **********************************************************************
+void ChecaEV(){  
+for(int i = 1; i <= nInstancias; i++){
+    if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
+     bool aux = testeDeColisao(i);
+     if(aux == true){
+     cout << "Bateu!" << endl;        //Colisão!
+     exit(0);
+     }
+    }
+}
 }
 // **********************************************************************
 //
@@ -476,6 +525,8 @@ void display(void) {
     DesenhaCurvas();
 
     glutSwapBuffers();
+
+    ChecaEV();
 }
 // **********************************************************************
 // ContaTempo(double tempo)
