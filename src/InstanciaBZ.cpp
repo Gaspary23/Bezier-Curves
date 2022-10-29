@@ -52,14 +52,14 @@ InstanciaBZ::InstanciaBZ() {
     direcao = 1;
 }
 
-InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade) {
+InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade, int dir) {
     Escala = Ponto(0.5, 0.5, 0.5);
 
     Curva = C;
     tAtual = 0.5; // Inicia no meio da curva
     Posicao = C->Calcula(tAtual);
 
-    direcao = 1; // deixar aleatorio (?)
+    direcao = dir; 
     nroDaCurva = nro;
     modelo = *mod;
     Velocidade = velocidade;
@@ -75,6 +75,7 @@ void InstanciaBZ::desenha() {
     (*modelo)();  // desenha a instancia
     glPopMatrix();
 }
+
 Ponto InstanciaBZ::ObtemPosicao() {
     // aplica as transformacoes geometricas no modelo
     // desenha a geometria do objeto

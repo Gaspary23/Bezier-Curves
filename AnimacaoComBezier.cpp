@@ -7,25 +7,17 @@
 // Marcio Sarroglia Pinho
 // pinho@pucrs.br
 // **********************************************************************
-
+#include <algorithm>
 #include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <random>
 #include <tuple>
 #include <vector>
-#include <algorithm>
-#include <random>
 
 using namespace std;
-
-#ifdef WIN32
-#include <glut.h>
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -51,19 +43,71 @@ Bezier Curvas[nCurvas];
 // Valor: indice da curva e direcao
 map<int, vector<tuple<int, int>>> mapa;
 
-const unsigned int nInstancias = 10;
+const unsigned int nInstancias = 5;
 InstanciaBZ Personagens[nInstancias];
 float velocidade = 3;
 
 // Limites logicos da area de desenho
 Ponto Min, Max;
-bool desenha = false, movimenta = true;
+bool desenha = false, movimentaPrincipal = true;
 
-Poligono Triangulo, PontosDeControle, CurvasDeControle, Aux, Envelope, Envelope2;
+Poligono Triangulo, PontosDeControle, CurvasDeControle;
 float angulo = 0.0;
 double nFrames = 0;
 double TempoTotal = 0;
 
+// **********************************************************************
+//
+// **********************************************************************
+void criaEnvelope(Poligono *envelope) {
+    float esquerda, direita, cima, baixo;
+    for (size_t i = 0; i < Triangulo.getNVertices(); i++) {
+        if (i == 0) {
+            esquerda = Triangulo.getVertice(i).x;
+            direita = Triangulo.getVertice(i).x;
+            cima = Triangulo.getVertice(i).y;
+            baixo = Triangulo.getVertice(i).y;
+        } else {
+            if (Triangulo.getVertice(i).x < esquerda) {
+                esquerda = Triangulo.getVertice(i).x;
+            }
+            if (Triangulo.getVertice(i).x > direita) {
+                direita = Triangulo.getVertice(i).x;
+            }
+            if (Triangulo.getVertice(i).y < baixo) {
+                baixo = Triangulo.getVertice(i).y;
+            }
+            if (Triangulo.getVertice(i).y > cima) {
+                cima = Triangulo.getVertice(i).y;
+            }
+        }
+    }
+    envelope->insereVertice(Ponto(esquerda, baixo, 0));
+    envelope->insereVertice(Ponto(direita, baixo, 0));
+    envelope->insereVertice(Ponto(direita, cima, 0));
+    envelope->insereVertice(Ponto(esquerda, cima, 0));
+}
+void checaColisao(int i) {
+    Poligono Envelope;
+
+    for(int idx = 0; idx < 2; idx++) {
+        idx = (idx == 0) ? 0 : i;
+        glPushMatrix();
+        glTranslatef(Personagens[idx].Posicao.x, Personagens[idx].Posicao.y, 0);
+        glRotatef(Personagens[idx].Rotacao, 0, 0, 1);
+        glScalef(Personagens[idx].Escala.x, Personagens[idx].Escala.y, Personagens[idx].Escala.z);
+        
+        criaEnvelope(&Envelope);
+        if(idx == 0) {
+            defineCor(Green);
+        } else {
+            defineCor(Red);
+        }
+        glLineWidth(2);
+        Envelope.desenhaPoligono();
+        glPopMatrix();
+    }
+}
 // **********************************************************************
 //
 // **********************************************************************
@@ -90,7 +134,7 @@ void animate() {
 }
 // **********************************************************************
 //  void reshape( int w, int h )
-//  trata o redimensionamento da janela OpenGL
+//      Trata o redimensionamento da janela OpenGL
 // **********************************************************************
 void reshape(int w, int h) {
     // Reset the coordinate system before modifying
@@ -105,6 +149,7 @@ void reshape(int w, int h) {
     glLoadIdentity();
 }
 // **********************************************************************
+//
 // **********************************************************************
 void DesenhaEixos() {
     Ponto Meio;
@@ -122,7 +167,9 @@ void DesenhaEixos() {
     glEnd();
 }
 // **********************************************************************
-void DesenhaMastro() {
+//
+// **********************************************************************
+void DesenhaTriangulo() {
     Triangulo.desenhaPoligono();
 }
 // **********************************************************************
@@ -216,22 +263,22 @@ int escolheProxCurva(int i, int shift = 0) {
         for (id = 0; id < size + 1; id++)
             if (get<0>(curvas[id]) == Personagens[i].nroDaCurva)
                 break;
-        
+
         /*
-        * Gera dois ids aleatorios dentro de intervalos definidos como:
-        *   id1 -> [0, id-1] 
-        *   id2 -> [id+1, size]
-        */
+         * Gera dois ids aleatorios dentro de intervalos definidos como:
+         *   id1 -> [0, id-1]
+         *   id2 -> [id+1, size]
+         */
         // Se o nro da curva atual for 0, id1 = 1 por convencao
-        id1 = id != 0 ? rand() % ((id - 1) + 1) : 1;
+        id1 = (id != 0) ? (rand() % ((id - 1) + 1)) : 1;
         // Se o nro da curva atual for size, id2 = size - 1 por convencao
-        id2 = id != size ? (id + 1) + (rand() % (size - (id + 1) + 1)) : size - 1;
-        
+        id2 = (id != size) ? ((id + 1) + (rand() % (size - (id + 1) + 1))) : size - 1;
+
         // escolhe um dos ids aleatorios
         int x = rand() % 2;
         new_id = x == 0 ? id1 : id2;
-    } // Se houver shift, escolhe uma curva "adjacente"
-    else {  
+    }  // Se houver shift, escolhe uma curva "adjacente"
+    else {
         // Encontra o id da proxima curva no vetor de curvas conectadas ao ponto
         //  para garantir que a nova proxima curva nao seja a mesma
         for (id = 0; id < size + 1; id++)
@@ -239,12 +286,19 @@ int escolheProxCurva(int i, int shift = 0) {
                 break;
 
         // garante que a curva escolhida nao seja a mesma que o jogador ja esta
-        //  e que o curva esteja nos limites logicos do vetor
+        //  e que a curva esteja nos limites logicos do vetor
         new_id = id + shift;
-        new_id = new_id < 0 ? size : new_id > size ? 0 : new_id;
+        if (new_id < 0)
+            new_id = size;
+        else if (new_id > size)
+            new_id = 0;
+
         if (get<0>(curvas[new_id]) == Personagens[i].nroDaCurva) {
             new_id += shift;
-            new_id = new_id < 0 ? size : new_id > size ? 0 : new_id;
+            if (new_id < 0)
+                new_id = size;
+            else if (new_id > size)
+                new_id = 0;
         }
     }
 
@@ -252,7 +306,7 @@ int escolheProxCurva(int i, int shift = 0) {
 }
 // **********************************************************************
 //  void MudaCurva(int i)
-//      Muda a curva em que o jogador de indice i se encontra pela 
+//      Muda a curva em que o jogador de indice i se encontra pela
 //          proxima curva que foi escolhida
 // **********************************************************************
 void MudaCurva(int i) {
@@ -281,7 +335,8 @@ void MudaCurva(int i) {
     Personagens[i].proxCurva = escolheProxCurva(i);
 }
 // **********************************************************************
-// Esta funcao deve instanciar todos os personagens do cenario
+//  void CriaInstancias()
+//      Esta funcao instancia todos os personagens do jogo
 // **********************************************************************
 void CriaInstancias() {
     // Cria e popula um vetor com todos os indices das curvas
@@ -298,12 +353,14 @@ void CriaInstancias() {
     //  na posicao equivalente a sua, para que nao haja dois jogadores na mesma curva
     for (size_t i = 0; i < nInstancias; i++) {
         int id = indiceCurvas[i];
-        Personagens[i] = InstanciaBZ(&Curvas[id], id, DesenhaMastro, velocidade);
+        int direcao = i < nInstancias / 2 ? 1 : -1;
+        Personagens[i] = InstanciaBZ(&Curvas[id], id, DesenhaTriangulo, velocidade, direcao);
         Personagens[i].proxCurva = escolheProxCurva(i);
     }
 }
 // **********************************************************************
-//
+//  void init()
+//     Esta funcao inicializa os objetos globais do jogo
 // **********************************************************************
 void init() {
     // Define a cor do fundo da tela
@@ -323,159 +380,24 @@ void init() {
 // **********************************************************************
 void MovimentaPersonagens(float tempoDecorrido) {
     for (size_t i = 0; i < nInstancias; i++) {
-        if (i != 0 || movimenta) {
+        if (i != 0) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
+            if (Personagens[i].nroDaCurva == Personagens[0].nroDaCurva) {
+                checaColisao(i);
+            }
+        } else  if (movimentaPrincipal){
+            Personagens[0].AtualizaPosicao(tempoDecorrido);
         }
+
         if (Personagens[i].tAtual >= 1.0 || Personagens[i].tAtual <= 0.0) {
             MudaCurva(i);
         }
     }
 }
 // **********************************************************************
-//
-// **********************************************************************
-Poligono CriaEnvelope(Ponto ref) {
-
-    Ponto vetor = Ponto(1, 0, 0);
-   if(ref == Personagens[0].Posicao){    
-    //cout << "Entrei no envelope do Jogador" << endl;
-    Envelope.insereVertice(ref);
-
-    vetor.rotacionaZ(90);
-    Envelope.insereVertice(vetor);
-
-    vetor.rotacionaZ(90);
-    Envelope.insereVertice(vetor);
-
-    vetor.rotacionaZ(90);
-    Envelope.insereVertice(vetor);
-
-    return Envelope;
-    }
-
-   else{
-    //cout << "Entrei no envelope do Inimigo" << endl;
-    Envelope2.insereVertice(ref);
-
-    vetor.rotacionaZ(90);
-    Envelope2.insereVertice(vetor);
-
-    vetor.rotacionaZ(90);
-    Envelope2.insereVertice(vetor);
-
-    vetor.rotacionaZ(90);
-    Envelope2.insereVertice(vetor);
-
-    return Envelope2;
-   }
-}
-// **********************************************************************
-//
-// **********************************************************************
-Poligono PosicionaEnvelope(Ponto referencia, Poligono *envelope, Poligono *aux) {
-    Ponto sup = referencia;
-    aux->insereVertice(Ponto((sup.x-1),(sup.y-0.8),0));
-    aux->insereVertice(Ponto((sup.x-1),(sup.y+0.8),0));
-    aux->insereVertice(Ponto((sup.x),(sup.y),0));
-    Poligono Triangulo = *aux;
-
-    float esquerda, direita, cima, baixo;
-    for (int i = 0; i < Triangulo.getNVertices(); i++) {
-        if (i == 0) {
-            esquerda = Triangulo.getVertice(i).x;
-            direita = Triangulo.getVertice(i).x;
-            cima = Triangulo.getVertice(i).y;
-            baixo = Triangulo.getVertice(i).y;
-        } else {
-            if (Triangulo.getVertice(i).x < esquerda) {
-                esquerda = Triangulo.getVertice(i).x;
-            }
-            if (Triangulo.getVertice(i).x > direita) {
-                direita = Triangulo.getVertice(i).x;
-            }
-            if (Triangulo.getVertice(i).y < baixo) {
-                baixo = Triangulo.getVertice(i).y;
-            }
-            if (Triangulo.getVertice(i).y > cima) {
-                cima = Triangulo.getVertice(i).y;
-            }
-        }
-    }
-
-    envelope->alteraVertice(0, Ponto(esquerda, baixo, 0));
-    envelope->alteraVertice(1, Ponto(direita, baixo, 0));
-    envelope->alteraVertice(2, Ponto(direita, cima, 0));
-    envelope->alteraVertice(3, Ponto(esquerda, cima, 0));
-
-    return *envelope;
-}
-
-// **********************************************************************
-// algoritmo de colisão:
-// **********************************************************************
-bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
-    if (min1.x <= max2.x && max1.x >= min2.x && min1.y <= max2.y && max1.y >= min2.y) {
-        cout << " min1.x = " << min1.x<< endl;
-        cout << " min1.y = " << min1.y<< endl;
-        cout << " max1.x = " << max1.x<< endl;
-        cout << " max1.y = " << max1.y<< endl;
-        cout << " min2.x = " << min2.x<< endl;
-        cout << " min2.y = " << min2.y<< endl;  
-        cout << " max2.x = " << max2.x<< endl;
-        cout << " max2.y = " << max2.y<< endl;  
-        return true;
-    }
-    return false;
-}
-// **********************************************************************
-//
-// **********************************************************************
-int o = 0;
-bool testeDeColisao(int IndiceInimigo) {
-    // cout << "Testando Colisão com" << IndiceInimigo << endl;
-
-Poligono PersonagemEnv = CriaEnvelope(Personagens[0].Posicao);
-Poligono InimigoEnv = CriaEnvelope(Personagens[IndiceInimigo].Posicao);
-Poligono Personagem = PosicionaEnvelope(Personagens[0].Posicao, &PersonagemEnv, &Aux);
-Poligono Inimigo =  PosicionaEnvelope(Personagens[IndiceInimigo].Posicao, &InimigoEnv, &Aux);
-
-if(o<1){
-//cout << "Posicao Inicial do personagem = " << Personagens[0].Posicao.x << Personagens[0].Posicao.y << endl;
-//cout << "Posicao Inicial do inimigo = " << Personagens[IndiceInimigo].Posicao.x << Personagens[IndiceInimigo].Posicao.y << endl;
-for (int i =0; i<=3; i++){
-    cout << "vertice " << i << " (x) do jogador = " << PersonagemEnv.getVertice(i).x << endl; 
-    cout << "vertice " << i << " (y) do jogador = " << PersonagemEnv.getVertice(i).y << endl; 
-    cout << "vertice " << i << " (x) do inimigo = " << InimigoEnv.getVertice(i).x << endl; 
-    cout << "vertice " << i << " (y) do inimigo = " << InimigoEnv.getVertice(i).y << endl; 
-}
-o++;
-}
-
-
-Ponto min1 = PersonagemEnv.getVertice(0);
-Ponto max1 = PersonagemEnv.getVertice(2);
-Ponto min2 = InimigoEnv.getVertice(0); 
-Ponto max2 = InimigoEnv.getVertice(2);
-
-bool aux = colide(min1,max1,min2,max2);
-return aux;
-}
-// **********************************************************************
-//
-// **********************************************************************
-void ChecaEV(){  
-for(int i = 1; i <= nInstancias; i++){
-    if(Personagens[0].nroDaCurva == Personagens[i].nroDaCurva){
-     bool aux = testeDeColisao(i);
-     if(aux == true){
-     cout << "Bateu!" << endl;        //Colisão!
-     exit(0);
-     }
-    }
-}
-}
-// **********************************************************************
-//
+//  void DesenhaPersonagens(bool atualizaMain)
+//      Desenha os personagens na tela. O parametro so nao eh falso
+//          quando o personagem principal muda de direcao
 // **********************************************************************
 void DesenhaPersonagens(bool atualizaMain = false) {
     for (size_t i = 0; i < nInstancias; i++) {
@@ -488,12 +410,14 @@ void DesenhaPersonagens(bool atualizaMain = false) {
     }
 }
 // **********************************************************************
-//
+//  void DesenhaCurvas()
+//      Desenhas as curvas na tela, deixando a curva atual e a 
+//          proxima do personagem principal com espessura diferente
 // **********************************************************************
 void DesenhaCurvas() {
     for (size_t i = 0; i < nCurvas; i++) {
         if (Personagens[0].nroDaCurva == i || Personagens[0].proxCurva == i) {
-            glLineWidth(5);
+            glLineWidth(6);
         } else
             glLineWidth(2);
         Curvas[i].Traca();
@@ -501,6 +425,7 @@ void DesenhaCurvas() {
 }
 // **********************************************************************
 //  void display( void )
+//      Funcao que desenha os objetos na tela
 // **********************************************************************
 void display(void) {
     // Limpa a tela coma cor de fundo
@@ -519,20 +444,21 @@ void display(void) {
         DesenhaEixos();
     }
 
+    // Trata do movimento e desenho dos personagens
     MovimentaPersonagens(T2.getDeltaT());
     glLineWidth(2);
     DesenhaPersonagens();
-
+    
+    // Trata do desenho das curvas
     DesenhaCurvas();
 
+    // Redesenha a tela
     glutSwapBuffers();
-
-    ChecaEV();
 }
 // **********************************************************************
-// ContaTempo(double tempo)
-//      conta um certo numero de segundos e informa quanto frames
-// se passaram neste periodo.
+//  void ContaTempo(double tempo)
+//      Conta um certo numero de segundos e informa quanto frames
+//          se passaram neste periodo.
 // **********************************************************************
 void ContaTempo(double tempo) {
     Temporizador T;
@@ -550,6 +476,7 @@ void ContaTempo(double tempo) {
 }
 // **********************************************************************
 //  void keyboard ( unsigned char key, int x, int y )
+//      Funcao que trata das teclas pressionadas no teclado
 // **********************************************************************
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
@@ -564,21 +491,21 @@ void keyboard(unsigned char key, int x, int y) {
             // Alterna entre desenhar e nao desenhar os eixos
             desenha = !desenha;
             break;
-        case 'f': 
+        case 'f':
             // Vai para Full Screen
-            glutFullScreen();  
+            glutFullScreen();
             break;
         case 'r':
             // Reposiciona a janela
             glutPositionWindow(50, 50);
-            glutReshapeWindow(700, 500);        
+            glutReshapeWindow(700, 500);
             break;
         case 't':
             ContaTempo(3);
             break;
         case ' ':
             // Controla se o jogador principal se move ou nao
-            movimenta = !movimenta;
+            movimentaPrincipal = !movimentaPrincipal;
             break;
         case 27:      // Termina o programa qdo
             exit(0);  // a tecla ESC for pressionada
@@ -589,6 +516,7 @@ void keyboard(unsigned char key, int x, int y) {
 }
 // **********************************************************************
 //  void arrow_keys ( int a_keys, int x, int y )
+//      Funcao que trata das setas pressionadas no teclado
 // **********************************************************************
 void arrow_keys(int a_keys, int x, int y) {
     float vel;
@@ -601,7 +529,7 @@ void arrow_keys(int a_keys, int x, int y) {
             // Muda a proxima curva selecionada pelo personagem principal
             Personagens[0].proxCurva = escolheProxCurva(0, 1);
             break;
-        case GLUT_KEY_UP:    
+        case GLUT_KEY_UP:
             // Aumenta a velocidade do personagem principal
             vel = Personagens[0].Velocidade + 0.5;
             vel = vel > 8 ? 8 : vel;
@@ -619,7 +547,6 @@ void arrow_keys(int a_keys, int x, int y) {
 }
 // **********************************************************************
 //  void main ( int argc, char** argv )
-//
 // **********************************************************************
 int main(int argc, char** argv) {
     cout << "Programa OpenGL" << endl;
