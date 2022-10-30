@@ -43,7 +43,7 @@ Bezier Curvas[nCurvas];
 // Valor: indice da curva e direcao
 map<int, vector<tuple<int, int>>> mapa;
 
-const unsigned int nInstancias = 15;
+const unsigned int nInstancias = 11;
 InstanciaBZ Personagens[nInstancias];
 float velocidade = 3;
 
@@ -51,7 +51,7 @@ float velocidade = 3;
 Ponto Min, Max;
 bool desenha = false, movimentaPrincipal = true;
 
-Poligono Triangulo, PontosDeControle, CurvasDeControle;
+Poligono Triangulo, MeiaSeta, PontosDeControle, CurvasDeControle;
 float angulo = 0.0;
 double nFrames = 0;
 double TempoTotal = 0;
@@ -186,8 +186,19 @@ void DesenhaTriangulo() {
 // **********************************************************************
 //
 // **********************************************************************
+void DesenhaSeta() {
+    glPushMatrix();
+        MeiaSeta.desenhaPoligono();
+        glScaled(1, -1, 1);
+        MeiaSeta.desenhaPoligono();
+    glPopMatrix();
+}
+// **********************************************************************
+//
+// **********************************************************************
 void CarregaModelos() {
     Triangulo.LePoligono("tests/Triangulo", false);
+    MeiaSeta.LePoligono("tests/MeiaSeta", false);
     PontosDeControle.LePoligono("tests/Pontos", false);
     CurvasDeControle.LePoligono("tests/Curvas", true);
 }
@@ -365,7 +376,8 @@ void CriaInstancias() {
     for (size_t i = 0; i < nInstancias; i++) {
         int id = indiceCurvas[i];
         int direcao = i < nInstancias / 2 ? 1 : -1;
-        Personagens[i] = InstanciaBZ(&Curvas[id], id, DesenhaTriangulo, velocidade, direcao);
+        TipoFuncao* modelo = i == 0 ? DesenhaSeta : DesenhaTriangulo;
+        Personagens[i] = InstanciaBZ(&Curvas[id], id, modelo, velocidade, direcao);
         Personagens[i].proxCurva = escolheProxCurva(i);
     }
 }
@@ -412,10 +424,12 @@ void MovimentaPersonagens(float tempoDecorrido) {
 // **********************************************************************
 void DesenhaPersonagens(bool atualizaMain = false) {
     for (size_t i = 0; i < nInstancias; i++) {
-        if (i == 0)
+        if (i == 0) {
+            glLineWidth(3);
             defineCor(Green);
-        else
-            defineCor(Red);
+        } else {
+            defineCor(Personagens[i].cor);
+        }
         Personagens[i].desenha();
         if (atualizaMain) break;
     }
