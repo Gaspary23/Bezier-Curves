@@ -56,24 +56,22 @@ float angulo = 0.0;
 double nFrames = 0;
 double TempoTotal = 0;
 
+int col;
+
 // **********************************************************************
 //
 // **********************************************************************
 void criaEnvelope(Poligono* envelope, int id) {
     float esquerda, direita, cima, baixo, x, y;
     Poligono ref = Personagens[id].modelRef;
+
     for (int i = ref.getNVertices() - 1; i >= 0; i--) {
         if (i == ref.getNVertices() - 1) {
-            esquerda = direita = Personagens[id].Posicao.x;
-            cima = baixo = Personagens[id].Posicao.y;
+            esquerda = direita = ref.getVertice(i).x;
+            cima = baixo = ref.getVertice(i).y;
         } else {
-            if (Personagens[id].direcao == 1) {
-                x = Personagens[id].Posicao.x + ref.getVertice(i).x;
-                y = Personagens[id].Posicao.y + ref.getVertice(i).y;
-            } else if (Personagens[id].direcao == -1) {
-                x = Personagens[id].Posicao.x - ref.getVertice(i).x;
-                y = Personagens[id].Posicao.y - ref.getVertice(i).y;
-            }
+            x = ref.getVertice(i).x;
+            y = ref.getVertice(i).y;
 
             if (x < esquerda)
                 esquerda = x;
@@ -104,9 +102,16 @@ bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
 }
 void checaColisao(int i) {
     Poligono EnvelopeMain, EnvelopeEnemy;
+    Ponto pos, modelPosI, modelPosF, min1, max1, min2, max2;
+    float angleRad;
 
     for (int idx = 0; idx < 2; idx++) {
         idx = (idx == 0) ? 0 : i;
+        glPushMatrix();
+        glTranslatef(Personagens[idx].Posicao.x, Personagens[idx].Posicao.y, 0);
+        glRotatef(Personagens[idx].Rotacao, 0, 0, 1);
+        glScalef(Personagens[idx].Escala.x, Personagens[idx].Escala.y, Personagens[idx].Escala.z);
+
         if (idx == 0) {
             criaEnvelope(&EnvelopeMain, idx);
             defineCor(Green);
@@ -118,15 +123,45 @@ void checaColisao(int i) {
             glPopMatrix();
         } else {
             criaEnvelope(&EnvelopeEnemy, idx);
-            defineCor(Personagens[idx].cor);
-            glLineWidth(2);
-            EnvelopeEnemy.desenhaPoligono();
+        }
+        glPopMatrix();
+    }
+
+    for (int idx = 0; idx < 2; idx++) {
+        idx = (idx == 0) ? 0 : i;
+
+        pos = Personagens[idx].Posicao;
+        angleRad = Personagens[idx].Rotacao * M_PI / 180;
+
+        modelPosI = (idx == 0) ? EnvelopeMain.getVertice(0) : EnvelopeEnemy.getVertice(0);
+        modelPosF = (idx == 0) ? EnvelopeMain.getVertice(2) : EnvelopeEnemy.getVertice(2);
+
+        if (idx == 0) {
+            min1.x = pos.x + modelPosI.x * cos(angleRad) - modelPosI.y * sin(angleRad);
+            min1.y = pos.y + modelPosI.x * sin(angleRad) + modelPosI.y * cos(angleRad);
+
+            max1.x = pos.x + modelPosF.x * cos(angleRad) - modelPosF.y * sin(angleRad);
+            max1.y = pos.y + modelPosF.x * sin(angleRad) + modelPosF.y * cos(angleRad);
+        } else {
+            min2.x = pos.x + modelPosI.x * cos(angleRad) - modelPosI.y * sin(angleRad);
+            min2.y = pos.y + modelPosI.x * sin(angleRad) + modelPosI.y * cos(angleRad);
+
+            max2.x = pos.x + modelPosF.x * cos(angleRad) - modelPosF.y * sin(angleRad);
+            max2.y = pos.y + modelPosF.x * sin(angleRad) + modelPosF.y * cos(angleRad);
         }
     }
-    if (colide(EnvelopeMain.getVertice(0), EnvelopeMain.getVertice(2),
-               EnvelopeEnemy.getVertice(0), EnvelopeEnemy.getVertice(2))) {
-        cout << "Colisao!" << endl;
-        cout << "Programa encerrado" << endl;
+
+    glBegin(GL_LINES);
+    defineCor(Black);
+    glLineWidth(5);
+    glVertex2f(min1.x, min1.y);
+    glVertex2f(max1.x, max1.y);
+    glEnd();
+
+    if (colide(min1, max1, min2, max2)) {
+        col++;
+        cout << "Colisao: " << col << endl;
+        // cout << "Programa encerrado" << endl;
         // exit(0);
     }
 }
@@ -386,10 +421,13 @@ void CriaInstancias() {
     //  na posicao equivalente a sua, para que nao haja dois jogadores na mesma curva
     for (size_t i = 0; i < nInstancias; i++) {
         int id = indiceCurvas[i];
+        // Metade dos jogadores comeca com a direcao 1 e outros com -1
         int direcao = i < nInstancias / 2 ? 1 : -1;
+        // Diferencia o modelo do jogador principal e dos outros
         TipoFuncao* modelo = i == 0 ? DesenhaSeta : DesenhaTriangulo;
         Poligono* modelRef = i == 0 ? &MeiaSeta : &Triangulo;
         Personagens[i] = InstanciaBZ(&Curvas[id], id, modelo, modelRef, velocidade, direcao);
+        // Escolhe a proxima curva para o jogador
         Personagens[i].proxCurva = escolheProxCurva(i);
     }
 }
@@ -417,9 +455,9 @@ void MovimentaPersonagens(float tempoDecorrido) {
     for (size_t i = 0; i < nInstancias; i++) {
         if (i != 0) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
-            if (Personagens[i].nroDaCurva == Personagens[0].nroDaCurva) {
-                checaColisao(i);
-            }
+            // if (Personagens[i].nroDaCurva == Personagens[0].nroDaCurva) {
+            checaColisao(i);
+            // }
         } else if (movimentaPrincipal) {
             Personagens[0].AtualizaPosicao(tempoDecorrido);
         }
