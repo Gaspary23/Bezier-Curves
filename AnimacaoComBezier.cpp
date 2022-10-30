@@ -37,13 +37,13 @@ Temporizador T;
 double AccumDeltaT = 0;
 Temporizador T2;
 
-const unsigned int nCurvas = 13;
+const unsigned int nCurvas = 28;
 Bezier Curvas[nCurvas];
 // chave: indice do ponto de controle
 // Valor: indice da curva e direcao
 map<int, vector<tuple<int, int>>> mapa;
 
-const unsigned int nInstancias = 5;
+const unsigned int nInstancias = 15;
 InstanciaBZ Personagens[nInstancias];
 float velocidade = 3;
 
@@ -108,15 +108,9 @@ void checaColisao(int i) {
         idx = (idx == 0) ? 0 : i;
         if (idx == 0) {
             criaEnvelope(&EnvelopeMain, idx);
-            Envelope = EnvelopeMain;
-            defineCor(Green);
         } else {
             criaEnvelope(&EnvelopeEnemy, idx);
-            Envelope = EnvelopeEnemy;
-            defineCor(Red);
         }
-        glLineWidth(2);
-        Envelope.desenhaPoligono();
     }
     if (colide(EnvelopeMain.getVertice(0), EnvelopeMain.getVertice(2),
                EnvelopeEnemy.getVertice(0), EnvelopeEnemy.getVertice(2))) {
@@ -194,7 +188,7 @@ void DesenhaTriangulo() {
 // **********************************************************************
 void CarregaModelos() {
     Triangulo.LePoligono("tests/Triangulo", false);
-    PontosDeControle.LePoligono("tests/PontosDeControle", false);
+    PontosDeControle.LePoligono("tests/Pontos", false);
     CurvasDeControle.LePoligono("tests/Curvas", true);
 }
 // **********************************************************************
