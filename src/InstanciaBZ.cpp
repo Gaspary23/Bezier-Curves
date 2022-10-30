@@ -53,7 +53,7 @@ InstanciaBZ::InstanciaBZ() {
 }
 
 InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade, int dir) {
-    Escala = Ponto(0.5, 0.5, 0.5);
+    Escala = Ponto(1, 1, 1);
 
     Curva = C;
     tAtual = 0.5; // Inicia no meio da curva

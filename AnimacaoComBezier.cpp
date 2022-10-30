@@ -59,27 +59,30 @@ double TempoTotal = 0;
 // **********************************************************************
 //
 // **********************************************************************
-void criaEnvelope(Poligono *envelope) {
-    float esquerda, direita, cima, baixo;
-    for (size_t i = 0; i < Triangulo.getNVertices(); i++) {
-        if (i == 0) {
-            esquerda = Triangulo.getVertice(i).x;
-            direita = Triangulo.getVertice(i).x;
-            cima = Triangulo.getVertice(i).y;
-            baixo = Triangulo.getVertice(i).y;
+void criaEnvelope(Poligono* envelope, int id) {
+    float esquerda, direita, cima, baixo, x, y;
+    for (int i = Triangulo.getNVertices() - 1; i >= 0; i--) {
+        if (i == Triangulo.getNVertices() - 1) {
+            esquerda = direita = Personagens[id].Posicao.x;
+            cima = baixo = Personagens[id].Posicao.y;
         } else {
-            if (Triangulo.getVertice(i).x < esquerda) {
-                esquerda = Triangulo.getVertice(i).x;
+            if (Personagens[id].direcao == 1) {
+                x = Personagens[id].Posicao.x + Triangulo.getVertice(i).x;
+                y = Personagens[id].Posicao.y + Triangulo.getVertice(i).y;
+            } else if (Personagens[id].direcao == -1) {
+                x = Personagens[id].Posicao.x - Triangulo.getVertice(i).x;
+                y = Personagens[id].Posicao.y - Triangulo.getVertice(i).y;
             }
-            if (Triangulo.getVertice(i).x > direita) {
-                direita = Triangulo.getVertice(i).x;
-            }
-            if (Triangulo.getVertice(i).y < baixo) {
-                baixo = Triangulo.getVertice(i).y;
-            }
-            if (Triangulo.getVertice(i).y > cima) {
-                cima = Triangulo.getVertice(i).y;
-            }
+
+            if (x < esquerda)
+                esquerda = x;
+            else if (x > direita)
+                direita = x;
+
+            if (y < baixo)
+                baixo = y;
+            else if (y > cima)
+                cima = y;
         }
     }
     envelope->insereVertice(Ponto(esquerda, baixo, 0));
@@ -87,25 +90,39 @@ void criaEnvelope(Poligono *envelope) {
     envelope->insereVertice(Ponto(direita, cima, 0));
     envelope->insereVertice(Ponto(esquerda, cima, 0));
 }
+// **********************************************************************
+//  bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2)
+//   verifica se o envelope 1 esta colidindo com o envelope 2
+// **********************************************************************
+bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
+    if (min1.x <= max2.x && max1.x >= min2.x &&
+        min1.y <= max2.y && max1.y >= min2.y) {
+        return true;
+    }
+    return false;
+}
 void checaColisao(int i) {
-    Poligono Envelope;
+    Poligono EnvelopeMain, EnvelopeEnemy, Envelope;
 
-    for(int idx = 0; idx < 2; idx++) {
+    for (int idx = 0; idx < 2; idx++) {
         idx = (idx == 0) ? 0 : i;
-        glPushMatrix();
-        glTranslatef(Personagens[idx].Posicao.x, Personagens[idx].Posicao.y, 0);
-        glRotatef(Personagens[idx].Rotacao, 0, 0, 1);
-        glScalef(Personagens[idx].Escala.x, Personagens[idx].Escala.y, Personagens[idx].Escala.z);
-        
-        criaEnvelope(&Envelope);
-        if(idx == 0) {
+        if (idx == 0) {
+            criaEnvelope(&EnvelopeMain, idx);
+            Envelope = EnvelopeMain;
             defineCor(Green);
         } else {
+            criaEnvelope(&EnvelopeEnemy, idx);
+            Envelope = EnvelopeEnemy;
             defineCor(Red);
         }
         glLineWidth(2);
         Envelope.desenhaPoligono();
-        glPopMatrix();
+    }
+    if (colide(EnvelopeMain.getVertice(0), EnvelopeMain.getVertice(2),
+               EnvelopeEnemy.getVertice(0), EnvelopeEnemy.getVertice(2))) {
+        cout << "Colisao!" << endl;
+        cout << "Programa encerrado" << endl;
+        exit(0);
     }
 }
 // **********************************************************************
@@ -385,7 +402,7 @@ void MovimentaPersonagens(float tempoDecorrido) {
             if (Personagens[i].nroDaCurva == Personagens[0].nroDaCurva) {
                 checaColisao(i);
             }
-        } else  if (movimentaPrincipal){
+        } else if (movimentaPrincipal) {
             Personagens[0].AtualizaPosicao(tempoDecorrido);
         }
 
@@ -411,7 +428,7 @@ void DesenhaPersonagens(bool atualizaMain = false) {
 }
 // **********************************************************************
 //  void DesenhaCurvas()
-//      Desenhas as curvas na tela, deixando a curva atual e a 
+//      Desenhas as curvas na tela, deixando a curva atual e a
 //          proxima do personagem principal com espessura diferente
 // **********************************************************************
 void DesenhaCurvas() {
@@ -448,7 +465,7 @@ void display(void) {
     MovimentaPersonagens(T2.getDeltaT());
     glLineWidth(2);
     DesenhaPersonagens();
-    
+
     // Trata do desenho das curvas
     DesenhaCurvas();
 
