@@ -5,7 +5,6 @@
 
 #include "../include/Bezier.h"
 #include "../include/ListaDeCoresRGB.h"
-
 // **********************************************************************
 //
 // **********************************************************************
@@ -13,7 +12,6 @@ void Bezier::calculaComprimentoDaCurva() {
     double DeltaT = 1.0 / 50;
     double t = DeltaT;
     Ponto P1, P2;
-
     ComprimentoTotalDaCurva = 0;
 
     P1 = Calcula(0.0);
@@ -27,6 +25,8 @@ void Bezier::calculaComprimentoDaCurva() {
     ComprimentoTotalDaCurva += calculaDistancia(P1, P2);
 }
 // **********************************************************************
+//
+// **********************************************************************
 Bezier::Bezier() {
     for (int i = 0; i < 3; i++)
         Coords[i] = Ponto(0, 0, 0);
@@ -34,6 +34,8 @@ Bezier::Bezier() {
 
     cor = rand() % 100;
 }
+// **********************************************************************
+//
 // **********************************************************************
 Bezier::Bezier(Ponto V[]) {
     for (int i = 0; i < 3; i++)
@@ -65,11 +67,13 @@ Ponto Bezier::getPC(int i) {
     return Coords[i];
 }
 // **********************************************************************
+//
+// **********************************************************************
 void Bezier::Traca() {
     double t = 0.0;
     double DeltaT = 1.0 / 50;
     Ponto P;
-    
+
     defineCor(cor);
     glBegin(GL_LINE_STRIP);
 

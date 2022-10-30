@@ -7,6 +7,8 @@
 //
 
 #include "../include/InstanciaBZ.h"
+#include "../include/Ponto.h"
+#include "../include/Bezier.h"
 
 // ***********************************************************
 //  void InstanciaPonto(Ponto3D *p, Ponto3D *out)
@@ -42,7 +44,7 @@ Ponto InstanciaPonto(Ponto P) {
 InstanciaBZ::InstanciaBZ() {
     Rotacao = 0;
     Posicao = Ponto(0, 0, 0);
-    Escala = Ponto(1, 1, 1);
+    Escala = Ponto(0.5, 0.5, 0.5);
 
     nroDaCurva = 0;
     proxCurva = -1;
@@ -50,19 +52,20 @@ InstanciaBZ::InstanciaBZ() {
     direcao = 1;
 }
 
-InstanciaBZ::InstanciaBZ(Bezier *C) {
-    Rotacao = 0;
-    Posicao = Ponto(0, 0, 0);
+InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, float velocidade, int dir) {
     Escala = Ponto(1, 1, 1);
 
     Curva = C;
-    tAtual = 0;
-    direcao = 1;
+    tAtual = 0.5; // Inicia no meio da curva
+    Posicao = C->Calcula(tAtual);
+
+    direcao = dir; 
+    nroDaCurva = nro;
+    modelo = *mod;
+    Velocidade = velocidade;
 }
 
 void InstanciaBZ::desenha() {
-    // Escala.imprime("Escala: ");
-    // cout << endl;
     //  Aplica as transformacoes geometricas no modelo
     glPushMatrix();
     glTranslatef(Posicao.x, Posicao.y, 0);
@@ -70,24 +73,37 @@ void InstanciaBZ::desenha() {
     glScalef(Escala.x, Escala.y, Escala.z);
 
     (*modelo)();  // desenha a instancia
-
     glPopMatrix();
 }
+
 Ponto InstanciaBZ::ObtemPosicao() {
     // aplica as transformacoes geometricas no modelo
     // desenha a geometria do objeto
-
     glPushMatrix();
     glTranslatef(Posicao.x, Posicao.y, 0);
     glRotatef(Rotacao, 0, 0, 1);
     Ponto PosicaoDoPersonagem;
     Ponto Origem(0, 0, 0);
     InstanciaPonto(Origem, PosicaoDoPersonagem);
-    // PosicaoDoPersonagem.imprime(); cout << endl;
     glPopMatrix();
     return PosicaoDoPersonagem;
 }
 
 void InstanciaBZ::AtualizaPosicao(float tempoDecorrido) {
-    // cout << "AtualizaPosicao" << endl;
+    // calcula a nova posicao do personagem
+    float distanciaPercorrida = Velocidade * tempoDecorrido;
+    float deltaT = direcao * Curva->CalculaT(distanciaPercorrida);
+    tAtual += deltaT;
+
+    // atualiza a posicao do personagem
+    Posicao = Curva->Calcula(tAtual);
+    
+    // calcula o proximo ponto da curva e o angulo entre o vetor atual e o proximo
+    float tFuturo = tAtual + deltaT;
+    Ponto v0 = Ponto(1,0,0);
+    Ponto v1 = Curva->Calcula(tFuturo) - Curva->Calcula(tAtual);
+    float angulo = acos(ProdEscalar(v0, v1) / v1.modulo()) * 180 / M_PI;
+
+    // atualiza a rotacao do personagem
+    Rotacao = v1.y >= 0 ?  angulo : -angulo;
 }

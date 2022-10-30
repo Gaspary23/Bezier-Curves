@@ -2,7 +2,7 @@
 PROG = Bezier
 
 CC = g++
-LINUX_FLAGS = -O3 -lGL -lGLU -lglut -lm -lstdc++
+LINUX_FLAGS = -O3 -lGL -lGLU -lglut -lm -lstdc++ -fopenmp
 DARWIN_FLAGS = -O3 -framework OpenGL -framework Cocoa -framework GLUT -lm -lstdc++
 
 OBJ_DIR = obj
