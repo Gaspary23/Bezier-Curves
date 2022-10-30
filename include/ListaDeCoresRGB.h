@@ -121,10 +121,10 @@ enum {
     Light_Purple,
     Very_Light_Purple,
     Yellow,
-    Green,
     Black,
     DarkYellow,
-    Red
+    Red,
+    Green
 };
 
 

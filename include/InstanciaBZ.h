@@ -10,6 +10,7 @@
 #define Instancia_hpp
 #include <iostream>
 #include "Bezier.h"
+#include "Poligono.h"
 
 typedef void TipoFuncao();
 
@@ -17,9 +18,10 @@ class InstanciaBZ{
 
 public:
     InstanciaBZ();
-    InstanciaBZ(Bezier *Curva, int nro, TipoFuncao *mod, float velocidade, int dir);
+    InstanciaBZ(Bezier *Curva, int nro, TipoFuncao *mod, Poligono *ref, float velocidade, int dir);
     
     TipoFuncao *modelo; // Modelo
+    Poligono modelRef; // Modelo de referencia
 
     Bezier *Curva; // referencia para a curva onde esta a instancia
     Ponto Posicao, Escala;

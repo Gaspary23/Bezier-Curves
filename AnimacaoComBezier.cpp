@@ -61,17 +61,18 @@ double TempoTotal = 0;
 // **********************************************************************
 void criaEnvelope(Poligono* envelope, int id) {
     float esquerda, direita, cima, baixo, x, y;
-    for (int i = Triangulo.getNVertices() - 1; i >= 0; i--) {
-        if (i == Triangulo.getNVertices() - 1) {
+    Poligono ref = Personagens[id].modelRef;
+    for (int i = ref.getNVertices() - 1; i >= 0; i--) {
+        if (i == ref.getNVertices() - 1) {
             esquerda = direita = Personagens[id].Posicao.x;
             cima = baixo = Personagens[id].Posicao.y;
         } else {
             if (Personagens[id].direcao == 1) {
-                x = Personagens[id].Posicao.x + Triangulo.getVertice(i).x;
-                y = Personagens[id].Posicao.y + Triangulo.getVertice(i).y;
+                x = Personagens[id].Posicao.x + ref.getVertice(i).x;
+                y = Personagens[id].Posicao.y + ref.getVertice(i).y;
             } else if (Personagens[id].direcao == -1) {
-                x = Personagens[id].Posicao.x - Triangulo.getVertice(i).x;
-                y = Personagens[id].Posicao.y - Triangulo.getVertice(i).y;
+                x = Personagens[id].Posicao.x - ref.getVertice(i).x;
+                y = Personagens[id].Posicao.y - ref.getVertice(i).y;
             }
 
             if (x < esquerda)
@@ -102,21 +103,31 @@ bool colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2) {
     return false;
 }
 void checaColisao(int i) {
-    Poligono EnvelopeMain, EnvelopeEnemy, Envelope;
+    Poligono EnvelopeMain, EnvelopeEnemy;
 
     for (int idx = 0; idx < 2; idx++) {
         idx = (idx == 0) ? 0 : i;
         if (idx == 0) {
             criaEnvelope(&EnvelopeMain, idx);
+            defineCor(Green);
+            glLineWidth(2);
+            glPushMatrix();
+                EnvelopeMain.desenhaPoligono();
+                glScaled(1, -1, 1);
+                EnvelopeMain.desenhaPoligono();
+            glPopMatrix();
         } else {
             criaEnvelope(&EnvelopeEnemy, idx);
+            defineCor(Personagens[idx].cor);
+            glLineWidth(2);
+            EnvelopeEnemy.desenhaPoligono();
         }
     }
     if (colide(EnvelopeMain.getVertice(0), EnvelopeMain.getVertice(2),
                EnvelopeEnemy.getVertice(0), EnvelopeEnemy.getVertice(2))) {
         cout << "Colisao!" << endl;
         cout << "Programa encerrado" << endl;
-        exit(0);
+        // exit(0);
     }
 }
 // **********************************************************************
@@ -188,9 +199,9 @@ void DesenhaTriangulo() {
 // **********************************************************************
 void DesenhaSeta() {
     glPushMatrix();
-        MeiaSeta.desenhaPoligono();
-        glScaled(1, -1, 1);
-        MeiaSeta.desenhaPoligono();
+    MeiaSeta.desenhaPoligono();
+    glScaled(1, -1, 1);
+    MeiaSeta.desenhaPoligono();
     glPopMatrix();
 }
 // **********************************************************************
@@ -377,7 +388,8 @@ void CriaInstancias() {
         int id = indiceCurvas[i];
         int direcao = i < nInstancias / 2 ? 1 : -1;
         TipoFuncao* modelo = i == 0 ? DesenhaSeta : DesenhaTriangulo;
-        Personagens[i] = InstanciaBZ(&Curvas[id], id, modelo, velocidade, direcao);
+        Poligono* modelRef = i == 0 ? &MeiaSeta : &Triangulo;
+        Personagens[i] = InstanciaBZ(&Curvas[id], id, modelo, modelRef, velocidade, direcao);
         Personagens[i].proxCurva = escolheProxCurva(i);
     }
 }
