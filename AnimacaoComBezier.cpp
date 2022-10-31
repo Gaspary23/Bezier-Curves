@@ -184,17 +184,17 @@ void CriaPersonagens() {
     mt19937 g(rd());
     shuffle(indiceCurvas.begin(), indiceCurvas.end(), g);
 
-    // Cada jogador comeca em uma curva aleatoria, escolhida do vetor embaralhado
-    //  na posicao equivalente a sua, para que nao haja dois jogadores na mesma curva
+    // Cada personagem comeca em uma curva aleatoria, escolhida do vetor embaralhado
+    //  na posicao equivalente a sua, para que nao haja dois personagens na mesma curva
     for (size_t i = 0; i < nInstancias; i++) {
         int id = indiceCurvas[i];
-        // Metade dos jogadores comeca com a direcao 1 e outros com -1
+        // Metade dos personagens comeca com a direcao 1 e outros com -1
         int direcao = i < nInstancias / 2 ? 1 : -1;
-        // Diferencia o modelo do jogador principal e dos outros
+        // Diferencia o modelo do jogador e dos outros
         TipoFuncao* modelo = i == 0 ? DesenhaSeta : DesenhaTriangulo;
         Poligono* modelRef = i == 0 ? &MeiaSeta : &Triangulo;
         Personagens[i] = InstanciaBZ(&Curvas[id], id, modelo, modelRef, velocidade, direcao);
-        // Escolhe a proxima curva para o jogador
+        // Escolhe a proxima curva para o personagem
         Personagens[i].proxCurva = EscolheProxCurva(i, 0, Personagens, CurvasDeControle, mapa);
     }
 }
@@ -240,7 +240,7 @@ void DesenhaTriangulo() {
 }
 // **********************************************************************
 //  void DesenhaSeta()
-//      Desenha a seta do jogador principal
+//      Desenha uma seta na tela
 // **********************************************************************
 void DesenhaSeta() {
     glPushMatrix();
@@ -283,7 +283,7 @@ void display(void) {
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 'd':
-            // Inverte a direcao do jogador principal
+            // Inverte a direcao do jogador
             Personagens[0].direcao = -Personagens[0].direcao;
             Personagens[0].proxCurva = EscolheProxCurva(0, 0, Personagens, CurvasDeControle, mapa);
             Personagens[0].AtualizaPosicao(T2.getDeltaT());
@@ -302,7 +302,7 @@ void keyboard(unsigned char key, int x, int y) {
             contaTempo(3);
             break;
         case ' ':
-            // Controla se o jogador principal se move ou nao
+            // Controla se o jogador se move ou nao
             movimentaPrincipal = !movimentaPrincipal;
             break;
         case 27:      // Termina o programa qdo

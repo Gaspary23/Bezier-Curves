@@ -51,13 +51,11 @@ void Ponto::soma(double x, double y, double z) {
 
 void Ponto::rotacionaZ(float angulo) {
     float xr, yr;
-    // cout << "Angulo: " << angulo << " ";
     double anguloRad = angulo * 3.14159265359 / 180.0;
     xr = x * cos(anguloRad) - y * sin(anguloRad);
     yr = x * sin(anguloRad) + y * cos(anguloRad);
     x = xr;
     y = yr;
-    // imprime();
 }
 
 void Ponto::rotacionaY(float angulo) {
@@ -111,6 +109,7 @@ bool operator==(Ponto P1, Ponto P2) {
     if (P1.x != P2.x) return false;
     if (P1.y != P2.y) return false;
     if (P1.z != P2.z) return false;
+    
     return true;
 }
 
@@ -211,7 +210,6 @@ void resetContadorInt() {
 long int getContadorInt() {
     return ContadorInt;
 }
-
 // **********************************************************************
 //
 // **********************************************************************

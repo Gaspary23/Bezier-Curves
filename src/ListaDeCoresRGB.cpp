@@ -1,7 +1,9 @@
 //https://community.khronos.org/t/color-tables/22518/5
+
 #include "../include/ListaDeCoresRGB.hpp"
 
 float Cores[][3] = {
+    
     0.439216,0.858824,0.576471,
     0.62352,0.372549,0.623529,
     0.647059,0.164706,0.164706,

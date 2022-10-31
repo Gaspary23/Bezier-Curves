@@ -72,11 +72,11 @@ InstanciaBZ::InstanciaBZ(Bezier *C, int nro, TipoFuncao *mod, Poligono *ref, flo
 void InstanciaBZ::desenha() {
     //  Aplica as transformacoes geometricas no modelo
     glPushMatrix();
-    glTranslatef(Posicao.x, Posicao.y, 0);
-    glRotatef(Rotacao, 0, 0, 1);
-    glScalef(Escala.x, Escala.y, Escala.z);
+        glTranslatef(Posicao.x, Posicao.y, 0);
+        glRotatef(Rotacao, 0, 0, 1);
+        glScalef(Escala.x, Escala.y, Escala.z);
 
-    (*modelo)();  // desenha a instancia
+        (*modelo)();  // desenha a instancia
     glPopMatrix();
 }
 
@@ -84,12 +84,13 @@ Ponto InstanciaBZ::ObtemPosicao() {
     // aplica as transformacoes geometricas no modelo
     // desenha a geometria do objeto
     glPushMatrix();
-    glTranslatef(Posicao.x, Posicao.y, 0);
-    glRotatef(Rotacao, 0, 0, 1);
-    Ponto PosicaoDoPersonagem;
-    Ponto Origem(0, 0, 0);
-    InstanciaPonto(Origem, PosicaoDoPersonagem);
+        glTranslatef(Posicao.x, Posicao.y, 0);
+        glRotatef(Rotacao, 0, 0, 1);
+        Ponto PosicaoDoPersonagem;
+        Ponto Origem(0, 0, 0);
+        InstanciaPonto(Origem, PosicaoDoPersonagem);
     glPopMatrix();
+
     return PosicaoDoPersonagem;
 }
 

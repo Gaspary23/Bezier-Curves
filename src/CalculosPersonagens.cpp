@@ -47,7 +47,7 @@ void CriaEnvelope(Poligono *envelope, int id, InstanciaBZ *Personagens) {
 }
 // **********************************************************************
 //  int EscolheProxCurva(int i, int shift, InstanciaBZ *Personagens, Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa)
-//      Escolhe a proxima curva que o jogador de indice i deve seguir
+//      Escolhe a proxima curva que o personagem de indice i deve seguir
 //       shift: 0 -> curva aleatoria dentre as conectadas ao ponto de chegada
 //       shift: 1 -> proxima curva no vetor de curvas conectadas ao ponto de chegada
 //       shift: -1 -> curva anterior no vetor de curvas conectadas ao ponto de chegada
@@ -56,10 +56,10 @@ int EscolheProxCurva(
     int i, int shift, InstanciaBZ *Personagens, 
     Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa
     ) {
-    // Pega o indice do ponto de chegada da curva em que o jogador esta
+    // Pega o indice do ponto de chegada da curva em que o personagem esta
     int ponto = PontoSaida(i, Personagens, CurvasDeControle);
 
-    // Vector local com as curvas conectadas ao ponto onde o jogador vai chegar
+    // Vector local com as curvas conectadas ao ponto onde o personagem vai chegar
     vector<tuple<int, int>> curvas = mapa[ponto];
     int id, new_id;
     int size = curvas.size() - 1;
@@ -95,7 +95,7 @@ int EscolheProxCurva(
             if (get<0>(curvas[id]) == Personagens[i].proxCurva)
                 break;
 
-        // garante que a curva escolhida nao seja a mesma que o jogador ja esta
+        // garante que a curva escolhida nao seja a mesma que o personagem ja esta
         //  e que a curva esteja nos limites logicos do vetor
         new_id = id + shift;
         if (new_id < 0)
@@ -125,29 +125,29 @@ void MovimentaPersonagens(
     for (size_t i = 0; i < nInstancias; i++) {
         if (i != 0) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
-            // Verifica se o jogador colidiu com o jogador principal
+            // Verifica se o personagem i colidiu com o jogador
             VerificaColisao(i, Personagens);
         } else if (movimentaPrincipal) {
             Personagens[0].AtualizaPosicao(tempoDecorrido);
         }
 
-        // Verifica se o jogador chegou ao fim da curva
+        // Verifica se o personagem chegou ao fim da curva
         if (Personagens[i].tAtual >= 1.0 || Personagens[i].tAtual <= 0.0) {
-            // Muda a curva em que o jogador esta para a proxima
+            // Muda a curva em que o personagem esta para a proxima
             MudaCurva(i, Personagens, CurvasDeControle, Curvas, mapa);
         }
     }
 }
 // **********************************************************************
 //  void MudaCurva(int i, InstanciaBZ *Personagens, Poligono CurvasDeControle, Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa)
-//      Muda a curva em que o jogador de indice i se encontra pela
+//      Muda a curva em que o personagem de indice i se encontra pela
 //          proxima curva que foi escolhida
 // **********************************************************************
 void MudaCurva(
     int i, InstanciaBZ *Personagens, Poligono CurvasDeControle,
     Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa
     ) {
-    // Pega o indice do ponto de chegada da curva em que o jogador esta
+    // Pega o indice do ponto de chegada da curva em que o personagem esta
     int ponto = PontoSaida(i, Personagens, CurvasDeControle);
 
     // Atualiza as variaveis do personagem com a nova curva
@@ -155,7 +155,7 @@ void MudaCurva(
     Personagens[i].Curva = &Curvas[prox];
     Personagens[i].nroDaCurva = prox;
 
-    // Vector local com as curvas conectadas ao ponto onde o jogador vai chegar
+    // Vector local com as curvas conectadas ao ponto onde o personagem vai chegar
     vector<tuple<int, int>> curvas = mapa[ponto];
     int pos;
     // Encontra o id da nova curva no vetor de curvas conectadas ao ponto
@@ -164,7 +164,7 @@ void MudaCurva(
         if (get<0>(curvas[pos]) == Personagens[i].nroDaCurva)
             break;
 
-    // Se a nova curva comeca no ponto, o jogador deve seguir o sentido
+    // Se a nova curva comeca no ponto, o personagem deve seguir o sentido
     //  contrario ao da curva e vice-versa
     Personagens[i].direcao = get<1>(curvas[pos]) == 0 ? 1 : -1;
     Personagens[i].tAtual = get<1>(curvas[pos]);
@@ -178,7 +178,7 @@ void MudaCurva(
 // **********************************************************************
 int PontoSaida(int i, InstanciaBZ *Personagens, Poligono CurvasDeControle) {
     int ponto;
-    // Escolhe o ponto de saida ou entrada da curva em que o jogador esta,
+    // Escolhe o ponto de saida ou entrada da curva em que o personagem esta,
     //  dependendo do sentido de movimento
     if (Personagens[i].direcao == 1)
         ponto = CurvasDeControle.getVertice(Personagens[i].nroDaCurva).z;
@@ -210,9 +210,9 @@ void VerificaColisao(int i, InstanciaBZ *Personagens) {
             defineCor(Green);
             glLineWidth(2);
             glPushMatrix();
-            EnvelopeMain.desenhaPoligono();
-            glScaled(1, -1, 1);
-            EnvelopeMain.desenhaPoligono();
+                EnvelopeMain.desenhaPoligono();
+                glScaled(1, -1, 1);
+                EnvelopeMain.desenhaPoligono();
             glPopMatrix();
         } else {
             CriaEnvelope(&EnvelopeEnemy, idx, Personagens);

@@ -15,7 +15,6 @@ Temporizador::Temporizador() {
 // Retorna o tempo decorrido desde a última chamada desta mesma função
 double Temporizador::getDeltaT() {
     double dt;
-
     // Figure out time elapsed since last call to idle function
     struct timeval end_time;
     gettimeofday(&end_time, NULL);
