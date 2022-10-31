@@ -55,7 +55,8 @@ void CriaEnvelope(Poligono *envelope, int id, InstanciaBZ *Personagens) {
 // **********************************************************************
 int EscolheProxCurva(
     int i, int shift, InstanciaBZ *Personagens,
-    Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa) {
+    Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa
+    ) {
     // Pega o indice do ponto de chegada da curva em que o personagem esta
     int ponto = PontoSaida(i, Personagens, CurvasDeControle);
 
@@ -73,7 +74,6 @@ int EscolheProxCurva(
         for (id = 0; id < size + 1; id++)
             if (get<0>(curvas[id]) == Personagens[i].nroDaCurva)
                 break;
-
         /*
          * Gera dois ids aleatorios dentro de intervalos definidos como:
          *   id1 -> [0, id-1]
@@ -119,12 +119,15 @@ int EscolheProxCurva(
 // **********************************************************************
 void MovimentaPersonagens(
     float tempoDecorrido, int nInstancias, InstanciaBZ *Personagens, Poligono CurvasDeControle,
-    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa, bool movimentaPrincipal) {
+    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa, bool movimentaPrincipal
+    ) {
     for (size_t i = 0; i < nInstancias; i++) {
         if (i != 0) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
             // Verifica se o personagem i colidiu com o jogador
-            VerificaColisao(i, Personagens);
+            //  se eles estao na mesma curva
+            if (Personagens[0].nroDaCurva == Personagens[i].nroDaCurva)
+                VerificaColisao(i, Personagens);
         } else if (movimentaPrincipal) {
             Personagens[0].AtualizaPosicao(tempoDecorrido);
         }
@@ -143,7 +146,8 @@ void MovimentaPersonagens(
 // **********************************************************************
 void MudaCurva(
     int i, InstanciaBZ *Personagens, Poligono CurvasDeControle,
-    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa) {
+    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa
+    ) {
     // Pega o indice do ponto de chegada da curva em que o personagem esta
     int ponto = PontoSaida(i, Personagens, CurvasDeControle);
 
@@ -160,7 +164,6 @@ void MudaCurva(
     for (pos = 0; pos < curvas.size(); pos++)
         if (get<0>(curvas[pos]) == Personagens[i].nroDaCurva)
             break;
-
     // Se a nova curva comeca no ponto, o personagem deve seguir o sentido
     //  contrario ao da curva e vice-versa
     Personagens[i].direcao = get<1>(curvas[pos]) == 0 ? 1 : -1;
@@ -245,8 +248,10 @@ void VerificaColisao(int i, InstanciaBZ *Personagens) {
 
     // Verifica se os envelopes colidem considerando que os pontos minimos 
     //  e maximos estao invertidos dependendo da direcao do personagem
-    if (Colide(min1, max1, min2, max2) || Colide(max1, min1, max2, min2)) {
+    if (Colide(min1, max1, min2, max2) || Colide(max1, min1, max2, min2) || 
+        Colide(min1, max1, max2, min2) || Colide(max1, min1, min2, max2)) {
         cout << "Colisao!" << endl;
+        sleep(3);
         // Encerra o programa
         cout << "Programa encerrado" << endl;
         exit(0);
