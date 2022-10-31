@@ -40,6 +40,7 @@ void CriaEnvelope(Poligono *envelope, int id, InstanciaBZ *Personagens) {
                 cima = y;
         }
     }
+    // Cria o envelope
     envelope->insereVertice(Ponto(esquerda, baixo, 0));
     envelope->insereVertice(Ponto(direita, baixo, 0));
     envelope->insereVertice(Ponto(direita, cima, 0));
@@ -53,9 +54,8 @@ void CriaEnvelope(Poligono *envelope, int id, InstanciaBZ *Personagens) {
 //       shift: -1 -> curva anterior no vetor de curvas conectadas ao ponto de chegada
 // **********************************************************************
 int EscolheProxCurva(
-    int i, int shift, InstanciaBZ *Personagens, 
-    Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa
-    ) {
+    int i, int shift, InstanciaBZ *Personagens,
+    Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa) {
     // Pega o indice do ponto de chegada da curva em que o personagem esta
     int ponto = PontoSaida(i, Personagens, CurvasDeControle);
 
@@ -119,9 +119,8 @@ int EscolheProxCurva(
 //      Esta funcao atualiza a posicao de todos os personagens do jogo
 // **********************************************************************
 void MovimentaPersonagens(
-    float tempoDecorrido, int nInstancias, InstanciaBZ *Personagens, Poligono CurvasDeControle, 
-    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa, bool movimentaPrincipal
-    ) {
+    float tempoDecorrido, int nInstancias, InstanciaBZ *Personagens, Poligono CurvasDeControle,
+    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa, bool movimentaPrincipal) {
     for (size_t i = 0; i < nInstancias; i++) {
         if (i != 0) {
             Personagens[i].AtualizaPosicao(tempoDecorrido);
@@ -145,8 +144,7 @@ void MovimentaPersonagens(
 // **********************************************************************
 void MudaCurva(
     int i, InstanciaBZ *Personagens, Poligono CurvasDeControle,
-    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa
-    ) {
+    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa) {
     // Pega o indice do ponto de chegada da curva em que o personagem esta
     int ponto = PontoSaida(i, Personagens, CurvasDeControle);
 
@@ -178,6 +176,7 @@ void MudaCurva(
 // **********************************************************************
 int PontoSaida(int i, InstanciaBZ *Personagens, Poligono CurvasDeControle) {
     int ponto;
+    
     // Escolhe o ponto de saida ou entrada da curva em que o personagem esta,
     //  dependendo do sentido de movimento
     if (Personagens[i].direcao == 1)
@@ -201,22 +200,15 @@ void VerificaColisao(int i, InstanciaBZ *Personagens) {
         idx = (idx == 0) ? 0 : i;
         // Realiza transformacoes geometricas para posicionar o envelope
         glPushMatrix();
-        glTranslatef(Personagens[idx].Posicao.x, Personagens[idx].Posicao.y, 0);
-        glRotatef(Personagens[idx].Rotacao, 0, 0, 1);
-        glScalef(Personagens[idx].Escala.x, Personagens[idx].Escala.y, Personagens[idx].Escala.z);
+            glTranslatef(Personagens[idx].Posicao.x, Personagens[idx].Posicao.y, 0);
+            glRotatef(Personagens[idx].Rotacao, 0, 0, 1);
+            glScalef(Personagens[idx].Escala.x, Personagens[idx].Escala.y, Personagens[idx].Escala.z);
 
-        if (idx == 0) {
-            CriaEnvelope(&EnvelopeMain, idx, Personagens);
-            defineCor(Green);
-            glLineWidth(2);
-            glPushMatrix();
-                EnvelopeMain.desenhaPoligono();
-                glScaled(1, -1, 1);
-                EnvelopeMain.desenhaPoligono();
-            glPopMatrix();
-        } else {
-            CriaEnvelope(&EnvelopeEnemy, idx, Personagens);
-        }
+            if (idx == 0) {
+                CriaEnvelope(&EnvelopeMain, idx, Personagens);
+            } else {
+                CriaEnvelope(&EnvelopeEnemy, idx, Personagens);
+            }
         glPopMatrix();
     }
 
@@ -252,18 +244,11 @@ void VerificaColisao(int i, InstanciaBZ *Personagens) {
         }
     }
 
-    glBegin(GL_LINES);
-    defineCor(Black);
-    glLineWidth(5);
-    glVertex2f(min1.x, min1.y);
-    glVertex2f(max1.x, max1.y);
-    glEnd();
-
     // Verifica se os envelopes colidem
     if (Colide(min1, max1, min2, max2)) {
         cout << "Colisao!" << endl;
         // Encerra o programa
-        // cout << "Programa encerrado" << endl;
-        // exit(0);
+        cout << "Programa encerrado" << endl;
+        exit(0);
     }
 }

@@ -32,7 +32,7 @@ bool movimentaPrincipal = true;
 // Limites logicos da area de desenho
 Ponto Min, Max;
 // Modelos de objetos e cenario
-Poligono Triangulo, MeiaSeta, PontosDeControle, CurvasDeControle;
+Poligono Triangulo, Seta, PontosDeControle, CurvasDeControle;
 
 // **********************************************************************
 //  void main ( int argc, char** argv )
@@ -116,7 +116,7 @@ void init() {
 // **********************************************************************
 void CarregaModelos() {
     Triangulo.LePoligono("tests/Triangulo", false);
-    MeiaSeta.LePoligono("tests/MeiaSeta", false);
+    Seta.LePoligono("tests/Seta", false);
     PontosDeControle.LePoligono("tests/Pontos", false);
     CurvasDeControle.LePoligono("tests/Curvas", true);
 }
@@ -192,7 +192,7 @@ void CriaPersonagens() {
         int direcao = i < nInstancias / 2 ? 1 : -1;
         // Diferencia o modelo do jogador e dos outros
         TipoFuncao* modelo = i == 0 ? DesenhaSeta : DesenhaTriangulo;
-        Poligono* modelRef = i == 0 ? &MeiaSeta : &Triangulo;
+        Poligono* modelRef = i == 0 ? &Seta : &Triangulo;
         Personagens[i] = InstanciaBZ(&Curvas[id], id, modelo, modelRef, velocidade, direcao);
         // Escolhe a proxima curva para o personagem
         Personagens[i].proxCurva = EscolheProxCurva(i, 0, Personagens, CurvasDeControle, mapa);
@@ -244,9 +244,9 @@ void DesenhaTriangulo() {
 // **********************************************************************
 void DesenhaSeta() {
     glPushMatrix();
-    MeiaSeta.desenhaPoligono();
+    Seta.desenhaPoligono();
     glScaled(1, -1, 1);
-    MeiaSeta.desenhaPoligono();
+    Seta.desenhaPoligono();
     glPopMatrix();
 }
 // **********************************************************************
