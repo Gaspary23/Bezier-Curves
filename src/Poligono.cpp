@@ -9,7 +9,7 @@
 #include <iostream>
 using namespace std;
 
-#include "../include/Poligono.h"
+#include "../include/Poligono.hpp"
 
 Poligono::Poligono() {
 }

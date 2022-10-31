@@ -5,11 +5,10 @@
 //  Created by Márcio Sarroglia Pinho on 22/09/20.
 //  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
 //
-
-#include "../include/InstanciaBZ.h"
-#include "../include/Bezier.h"
-#include "../include/Poligono.h"
-#include "../include/Ponto.h"
+#include "../include/InstanciaBZ.hpp"
+#include "../include/Bezier.hpp"
+#include "../include/Poligono.hpp"
+#include "../include/Ponto.hpp"
 
 // ***********************************************************
 //  void InstanciaPonto(Ponto3D *p, Ponto3D *out)

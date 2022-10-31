@@ -1,7 +1,5 @@
-#include "../include/ListaDeCoresRGB.h"
-
 //https://community.khronos.org/t/color-tables/22518/5
-
+#include "../include/ListaDeCoresRGB.hpp"
 
 float Cores[][3] = {
     0.439216,0.858824,0.576471,
@@ -104,9 +102,6 @@ float Cores[][3] = {
     0, 1, 0,
     };
 
-void defineCor(int c)
-{
+void defineCor(int c) {
     glColor3f(Cores[c][0], Cores[c][1], Cores[c][2]);
 }
-
-						

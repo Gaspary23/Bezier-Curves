@@ -5,18 +5,11 @@
 //  Created by Márcio Sarroglia Pinho on 10/10/21.
 //  Copyright © 2021 Márcio Sarroglia Pinho. All rights reserved.
 //
-
-#ifndef Bezier_h
-#define Bezier_h
+#ifndef Bezier_hpp
+#define Bezier_hpp
 
 #include <iostream>
 using namespace std;
-
-
-#ifdef WIN32
-#include <windows.h>
-#include <glut.h>
-#endif
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -26,7 +19,7 @@ using namespace std;
 #include <GL/glut.h>
 #endif
 
-#include "Ponto.h"
+#include "Ponto.hpp"
 
 class Bezier
 {

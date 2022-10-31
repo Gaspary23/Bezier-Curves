@@ -1,22 +1,13 @@
 //https://community.khronos.org/t/color-tables/22518/5
-
-#ifndef ListaDeCoresRGB
-#define ListaDeCoresRGB
+#ifndef ListaDeCoresRGB_hpp
+#define ListaDeCoresRGB_hpp
 
 #include <iostream>
 #include <cmath>
 #include <ctime>
 #include <fstream>
-
-
-using namespace std;
-
-#ifdef WIN32
-#include <windows.h>
-#include <glut.h>
-#else
 #include <sys/time.h>
-#endif
+using namespace std;
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -126,7 +117,6 @@ enum {
     Red,
     Green
 };
-
 
 void defineCor(int c);
 

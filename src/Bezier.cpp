@@ -2,9 +2,8 @@
 //  Bezier.cpp
 //  OpenGL
 //
-
-#include "../include/Bezier.h"
-#include "../include/ListaDeCoresRGB.h"
+#include "../include/Bezier.hpp"
+#include "../include/ListaDeCoresRGB.hpp"
 // **********************************************************************
 //
 // **********************************************************************

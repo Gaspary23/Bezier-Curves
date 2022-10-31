@@ -5,12 +5,11 @@
 //  Created by Marcio Sarroglia Pinho on 22/09/20.
 //  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
 //
-
 #ifndef Instancia_hpp
 #define Instancia_hpp
 #include <iostream>
-#include "Bezier.h"
-#include "Poligono.h"
+#include "Bezier.hpp"
+#include "Poligono.hpp"
 
 typedef void TipoFuncao();
 
@@ -37,6 +36,5 @@ public:
     void AtualizaPosicao(float tempoDecorrido);
     Ponto ObtemPosicao();
 };
-
 
 #endif /* Instancia_hpp */
