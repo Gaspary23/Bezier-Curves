@@ -111,7 +111,6 @@ int EscolheProxCurva(
                 new_id = 0;
         }
     }
-
     return get<0>(curvas[new_id]);
 }
 // **********************************************************************
@@ -176,7 +175,7 @@ void MudaCurva(
 // **********************************************************************
 int PontoSaida(int i, InstanciaBZ *Personagens, Poligono CurvasDeControle) {
     int ponto;
-    
+
     // Escolhe o ponto de saida ou entrada da curva em que o personagem esta,
     //  dependendo do sentido de movimento
     if (Personagens[i].direcao == 1)
@@ -244,8 +243,9 @@ void VerificaColisao(int i, InstanciaBZ *Personagens) {
         }
     }
 
-    // Verifica se os envelopes colidem
-    if (Colide(min1, max1, min2, max2)) {
+    // Verifica se os envelopes colidem considerando que os pontos minimos 
+    //  e maximos estao invertidos dependendo da direcao do personagem
+    if (Colide(min1, max1, min2, max2) || Colide(max1, min1, max2, min2)) {
         cout << "Colisao!" << endl;
         // Encerra o programa
         cout << "Programa encerrado" << endl;
