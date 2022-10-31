@@ -1,9 +1,9 @@
 //
-//  Instancia.h
-//  OpenGLTest
+//  Instancia.hpp
+//  Metodos_Colisao
 //
 //  Created by Marcio Sarroglia Pinho on 22/09/20.
-//  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
+//  Copyright © 2020 Marcio Sarroglia Pinho. All rights reserved.
 //
 #ifndef Instancia_hpp
 #define Instancia_hpp
@@ -21,7 +21,6 @@ public:
     
     TipoFuncao *modelo; // Modelo
     Poligono modelRef; // Modelo de referencia
-
     Bezier *Curva; // referencia para a curva onde esta a instancia
     Ponto Posicao, Escala;
     float Rotacao;
@@ -37,4 +36,4 @@ public:
     Ponto ObtemPosicao();
 };
 
-#endif /* Instancia_hpp */
+#endif

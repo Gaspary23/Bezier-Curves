@@ -102,7 +102,7 @@ float Cores[][3] = {
     0.8, 0.8, 0,
     1, 0, 0,
     0, 1, 0,
-    };
+};
 
 void defineCor(int c) {
     glColor3f(Cores[c][0], Cores[c][1], Cores[c][2]);

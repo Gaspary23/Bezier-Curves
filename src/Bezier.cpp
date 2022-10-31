@@ -1,7 +1,11 @@
 //
 //  Bezier.cpp
-//  OpenGL
+//  Metodos_Colisao
 //
+//  Alterado para o trabalho da disciplina por:
+//  Pedro da Cunha Gaspary - 21101429 e Lucas Marchesan Cunha - 21101060
+//
+
 #include "../include/Bezier.hpp"
 #include "../include/ListaDeCoresRGB.hpp"
 
@@ -21,6 +25,7 @@ void Bezier::calculaComprimentoDaCurva() {
         P1 = P2;
         t += DeltaT;
     }
+    
     P2 = Calcula(1.0);  // faz o fechamento da curva
     ComprimentoTotalDaCurva += calculaDistancia(P1, P2);
 }

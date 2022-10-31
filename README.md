@@ -1,4 +1,3 @@
-
 # Trabalho sobre Métodos de Colisão
 
 Trabalho 2 da disciplina de Computação Gráfica desenvolvido por Marcio Pinho e alterado por Pedro Gaspary e Lucas Cunha. O código foi desenvolvido em C++ e utiliza a biblioteca OpenGL.
@@ -52,13 +51,13 @@ O personagem do jogador se movimenta sozinho ao longo das curvas, porém o jogad
 
 `space` - Para o personagem se estiver se movendo e reinicia o movimento se estiver parado
 
-`d`- Muda a direção em que o personagem está se movendo na curva
+`d` - Muda a direção em que o personagem está se movendo na curva
 
 ### Janela
 
 `f` - Deixa a janela do jogo em Full Screen
 
-`r`- Retorna o tamanho da janela para o padrão 
+`r` - Retorna o tamanho da janela para o padrão 
 
 `t` - Conta o número de frames nos próximos 3 segundos
 

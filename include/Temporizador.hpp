@@ -1,10 +1,11 @@
 //
 //  Temporizador.hpp
-//  Imagens
+//  Metodos_Colisao
 //
-//  Created by Márcio Sarroglia Pinho on 23/03/20.
+//  Created by Marcio Sarroglia Pinho on 23/03/20.
 //  Copyright © 2020 rmd. All rights reserved.
 //
+
 #ifndef Temporizador_hpp
 #define Temporizador_hpp
 
@@ -20,4 +21,4 @@ class Temporizador {
     double getDeltaT();  // Retorna o tempo decorrido desde a última chamada desta mesma função
 };
 
-#endif /* ControlaTempo_hpp */
+#endif

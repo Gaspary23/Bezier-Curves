@@ -4,8 +4,10 @@
 //
 // Programa basico para criar aplicacoes 2D em OpenGL
 //
-// Marcio Sarroglia Pinho
-// pinho@pucrs.br
+// Marcio Sarroglia Pinho - pinho@pucrs.br
+//
+// Alterado para o trabalho da disciplina por:
+// Pedro da Cunha Gaspary - 21101429 e Lucas Marchesan Cunha - 21101060
 // **********************************************************************
 #include "include/AnimacaoComBezier.hpp"
 
@@ -26,7 +28,7 @@ const unsigned int nInstancias = 11;
 InstanciaBZ Personagens[nInstancias];
 // Velocidade dos personagens
 float velocidade = 3;
-// Controle do movimento do jogador 
+// Controle do movimento do jogador
 bool movimentaPrincipal = true;
 
 // Limites logicos da area de desenho
@@ -115,8 +117,10 @@ void init() {
 //      Carrega os modelos dos personagens e do cenario
 // **********************************************************************
 void CarregaModelos() {
+    // Carrega os modelos de personagens
     Triangulo.LePoligono("tests/Triangulo", false);
     Seta.LePoligono("tests/Seta", false);
+    // Carrega os modelos do cenario
     PontosDeControle.LePoligono("tests/Pontos", false);
     CurvasDeControle.LePoligono("tests/Curvas", true);
 }
@@ -144,7 +148,7 @@ void CriaCurvas() {
 //    Cria o mapa de curvas do cenario
 //    O mapa de curvas eh um mapa, em que cada chave representa
 //      o indice de um ponto no cenario e o valor representa
-//      um vetor de tuplas em que cada tupla contem 
+//      um vetor de tuplas em que cada tupla contem
 //      o indice de uma curva que passa por esse ponto
 //      e a direcao com que essa curva passa no ponto (0 = inicio, 1 = fim)
 // **********************************************************************
@@ -230,7 +234,6 @@ void DesenhaPersonagens(bool atualizaMain = false) {
         Personagens[i].desenha();
     }
 }
-
 // **********************************************************************
 //  void DesenhaTriangulo()
 //    Desenha um triangulo na tela
@@ -243,11 +246,7 @@ void DesenhaTriangulo() {
 //      Desenha uma seta na tela
 // **********************************************************************
 void DesenhaSeta() {
-    glPushMatrix();
     Seta.desenhaPoligono();
-    glScaled(1, -1, 1);
-    Seta.desenhaPoligono();
-    glPopMatrix();
 }
 // **********************************************************************
 //  void display( void )
@@ -261,12 +260,9 @@ void display(void) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    // Coloque aqui as chamadas das rotinas que desenham os objetos
-    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<s
-
     // Trata do movimento e desenho dos personagens
-    MovimentaPersonagens(T2.getDeltaT(), nInstancias, Personagens, CurvasDeControle, Curvas, mapa, movimentaPrincipal);
+    MovimentaPersonagens(T2.getDeltaT(), nInstancias, Personagens,
+                         CurvasDeControle, Curvas, mapa, movimentaPrincipal);
     glLineWidth(2);
     DesenhaPersonagens();
 
@@ -287,6 +283,7 @@ void keyboard(unsigned char key, int x, int y) {
             Personagens[0].direcao = -Personagens[0].direcao;
             Personagens[0].proxCurva = EscolheProxCurva(0, 0, Personagens, CurvasDeControle, mapa);
             Personagens[0].AtualizaPosicao(T2.getDeltaT());
+            // Atualiza o desenho do jogador depois de inverter a direcao
             DesenhaPersonagens(true);
             break;
         case 'f':
@@ -305,8 +302,9 @@ void keyboard(unsigned char key, int x, int y) {
             // Controla se o jogador se move ou nao
             movimentaPrincipal = !movimentaPrincipal;
             break;
-        case 27:      // Termina o programa qdo
-            exit(0);  // a tecla ESC for pressionada
+        case 27:      // ESC
+            // Finaliza do programa
+            exit(0);
             break;
         default:
             break;
@@ -355,6 +353,7 @@ void contaTempo(double tempo) {
     while (true) {
         tempo -= T.getDeltaT();
         cont++;
+
         if (tempo <= 0.0) {
             break;
         }
@@ -383,11 +382,12 @@ void reshape(int w, int h) {
 void animate() {
     double dt;
     dt = T.getDeltaT();
+
     AccumDeltaT += dt;
     TempoTotal += dt;
     nFrames++;
 
-    if (AccumDeltaT > 1.0 / 30)  { // fixa a atualizacao da tela em 30
+    if (AccumDeltaT > 1.0 / 30) {  // fixa a atualizacao da tela em 30
         AccumDeltaT = 0;
         angulo += 2;
         glutPostRedisplay();

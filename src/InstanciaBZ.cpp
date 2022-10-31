@@ -1,10 +1,14 @@
 //
 //  InstanciaBZ.cpp
-//  OpenGLTest
+//  Metodos_Colisao
 //
-//  Created by Márcio Sarroglia Pinho on 22/09/20.
+//  Created by Marcio Sarroglia Pinho on 22/09/20.
 //  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
 //
+//  Alterado para o trabalho da disciplina por:
+//  Pedro da Cunha Gaspary - 21101429 e Lucas Marchesan Cunha - 21101060
+//
+
 #include "../include/InstanciaBZ.hpp"
 #include "../include/Bezier.hpp"
 #include "../include/Poligono.hpp"
@@ -42,9 +46,10 @@ Ponto InstanciaPonto(Ponto P) {
 }
 
 InstanciaBZ::InstanciaBZ() {
+    Escala = Ponto(1, 1, 1);
+    
     Rotacao = 0;
     Posicao = Ponto(0, 0, 0);
-    Escala = Ponto(1, 1, 1);
 
     nroDaCurva = 0;
     proxCurva = -1;

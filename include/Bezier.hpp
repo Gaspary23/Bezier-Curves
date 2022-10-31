@@ -1,15 +1,12 @@
 //
 //  CurvaBezier.hpp
-//  OpenGL
+//  Metodos_Colisao
 //
-//  Created by Márcio Sarroglia Pinho on 10/10/21.
-//  Copyright © 2021 Márcio Sarroglia Pinho. All rights reserved.
+//  Created by Marcio Sarroglia Pinho on 10/10/21.
+//  Copyright © 2021 Marcio Sarroglia Pinho. All rights reserved.
 //
 #ifndef Bezier_hpp
 #define Bezier_hpp
-
-#include <iostream>
-using namespace std;
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -19,12 +16,13 @@ using namespace std;
 #include <GL/glut.h>
 #endif
 
+#include <iostream>
 #include "Ponto.hpp"
+using namespace std;
 
 class Bezier
 {
     Ponto Coords[3];
-
 public:
     float ComprimentoTotalDaCurva;
     int cor;
@@ -38,5 +36,4 @@ public:
     double CalculaT(double distanciaPercorrida);
     void calculaComprimentoDaCurva();
 };
-
 #endif 

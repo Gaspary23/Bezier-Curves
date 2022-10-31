@@ -1,9 +1,9 @@
 //
 //  Ponto.hpp
-//  OpenGLTest
+//  Metodos_Colisao
 //
-//  Created by Márcio Sarroglia Pinho on 18/08/20.
-//  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
+//  Created by Marcio Sarroglia Pinho on 18/08/20.
+//  Copyright © 2020 Marcio Sarroglia Pinho. All rights reserved.
 //
 #ifndef Ponto_hpp
 #define Ponto_hpp
@@ -30,11 +30,9 @@ public:
     void rotacionaX(float angulo);
     void rotacionaY(float angulo);
     void rotacionaZ(float angulo);
-} ;
-
+};
 
 Ponto ObtemMinimo (Ponto P1, Ponto P2);
-
 Ponto ObtemMaximo (Ponto P1, Ponto P2);
 
 bool operator==(Ponto P1, Ponto P2);
@@ -53,4 +51,4 @@ void resetContadorInt();
 int lado(Ponto P1, Ponto P2, Ponto A);
 double calculaDistancia(Ponto P, Ponto Q);
 
-#endif /* Ponto_hpp */
+#endif

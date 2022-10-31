@@ -1,5 +1,19 @@
+//
+//  AnimacaoComBezier.hpp
+//  Metodos_Colisao
+//
+//  Created by Pedro da Cunha Gaspary - p.gaspary@edu.pucrs.br
+//
 #ifndef AnimacaoComBezier_Hpp
 #define AnimacaoComBezier_Hpp
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#endif
+
+#ifdef __linux__
+#include <GL/glut.h>
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -10,23 +24,13 @@
 #include <random>
 #include <tuple>
 #include <vector>
-
-using namespace std;
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#endif
-
-#ifdef __linux__
-#include <GL/glut.h>
-#endif
-
 #include "CalculosPersonagens.hpp"
 #include "InstanciaBZ.hpp"
 #include "ListaDeCoresRGB.hpp"
 #include "Poligono.hpp"
 #include "Ponto.hpp"
 #include "Temporizador.hpp"
+using namespace std;
 
 void CarregaModelos();
 void CriaPersonagens();

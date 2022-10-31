@@ -1,3 +1,10 @@
+//
+//  CalculosPersonagens.cpp
+//  Metodos_Colisao
+//
+//  Created by Pedro da Cunha Gaspary - p.gaspary@edu.pucrs.br
+//
+
 #include "../include/CalculosPersonagens.hpp"
 // **********************************************************************
 //  bool Colide(Ponto min1, Ponto max1, Ponto min2, Ponto max2)
@@ -111,6 +118,7 @@ int EscolheProxCurva(
                 new_id = 0;
         }
     }
+
     return get<0>(curvas[new_id]);
 }
 // **********************************************************************
@@ -250,10 +258,12 @@ void VerificaColisao(int i, InstanciaBZ *Personagens) {
     //  e maximos estao invertidos dependendo da direcao do personagem
     if (Colide(min1, max1, min2, max2) || Colide(max1, min1, max2, min2) || 
         Colide(min1, max1, max2, min2) || Colide(max1, min1, min2, max2)) {
-        cout << "Colisao!" << endl;
+        cout << "\nColisao!" << endl;
+        // Espera por 3 segundos para que o jogador possa ver o que aconteceu
         sleep(3);
+
         // Encerra o programa
-        cout << "Programa encerrado" << endl;
+        cout << "Programa encerrado." << endl;
         exit(0);
     }
 }

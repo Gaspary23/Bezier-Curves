@@ -1,4 +1,5 @@
 # Makefile para Linux e macOS
+# Autor: Pedro da Cunha Gaspary - p.gaspary@edu.pucrs.br
 PROG = Bezier
 
 CC = g++
@@ -8,7 +9,8 @@ DARWIN_FLAGS = -O3 -framework OpenGL -framework Cocoa -framework GLUT -lm -lstdc
 OBJ_DIR = obj
 SRC_DIR = src
 
-FONTES = Ponto.cpp Poligono.cpp Temporizador.cpp ListaDeCoresRGB.cpp InstanciaBZ.cpp Bezier.cpp CalculosPersonagens.cpp
+FONTES = Ponto.cpp Poligono.cpp Temporizador.cpp ListaDeCoresRGB.cpp 
+FONTES += InstanciaBZ.cpp Bezier.cpp CalculosPersonagens.cpp
 OBJ = $(addprefix $(OBJ_DIR)/, $(FONTES:.cpp=.o))
 
 UNAME = `uname`

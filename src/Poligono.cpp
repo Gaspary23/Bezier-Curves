@@ -1,10 +1,14 @@
 //
 //  Poligono.cpp
-//  OpenGLTest
+//  Metodos_Colisao
 //
-//  Created by Márcio Sarroglia Pinho on 18/08/20.
+//  Created by Marcio Sarroglia Pinho on 18/08/20.
 //  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
 //
+//  Alterado para o trabalho da disciplina por:
+//  Pedro da Cunha Gaspary - 21101429 e Lucas Marchesan Cunha - 21101060
+//
+
 #include <fstream>
 #include <iostream>
 #include "../include/Poligono.hpp"
@@ -87,6 +91,7 @@ void Poligono::LePoligono(const char *nome, bool is3D) {
     input >> qtdVertices;
     for (int i = 0; i < qtdVertices; i++) {
         double x, y, z;
+        
         // Le cada elemento da linha
         input >> x >> y; 
         if (is3D)

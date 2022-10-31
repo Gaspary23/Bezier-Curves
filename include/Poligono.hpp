@@ -1,15 +1,13 @@
 //
 //  Poligono.hpp
-//  OpenGLTest
+//  Metodos_Colisao
 //
-//  Created by Márcio Sarroglia Pinho on 18/08/20.
-//  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
+//  Created by Marcio Sarroglia Pinho on 18/08/20.
+//  Copyright © 2020 Marcio Sarroglia Pinho. All rights reserved.
 //
+
 #ifndef Poligono_hpp
 #define Poligono_hpp
-
-#include <iostream>
-using namespace std;
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -20,13 +18,17 @@ using namespace std;
 #endif
 
 #include "Ponto.hpp"
+#include <iostream>
 #include <vector>
+using namespace std;
 
 class Poligono
 {
     vector <Ponto> Vertices;
     Ponto Min, Max;
+    
 public:
+
     Poligono();
     Ponto getVertice(int);
     unsigned long getNVertices();

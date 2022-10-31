@@ -1,9 +1,12 @@
 //
 //  Ponto.cpp
-//  OpenGLTest
+//  Metodos_Colisao
 //
-//  Created by Márcio Sarroglia Pinho on 18/08/20.
+//  Created by Marcio Sarroglia Pinho on 18/08/20.
 //  Copyright © 2022 Márcio Sarroglia Pinho. All rights reserved.
+//
+//  Alterado para o trabalho da disciplina por:
+//  Pedro da Cunha Gaspary - 21101429 e Lucas Marchesan Cunha - 21101060
 //
 #include "../include/Ponto.hpp"
 
@@ -142,6 +145,7 @@ Ponto operator*(Ponto P1, float k) {
 Ponto operator-(Ponto P1) {
     return P1 * -1;
 }
+
 // **********************************************************************
 //    Calcula o produto escalar entre os vetores V1 e V2
 // **********************************************************************
@@ -156,6 +160,7 @@ void ProdVetorial(Ponto v1, Ponto v2, Ponto &vresult) {
     vresult.y = v1.z * v2.x - (v1.x * v2.z);
     vresult.z = v1.x * v2.y - (v1.y * v2.x);
 }
+
 long int ContadorInt = 0;
 /* ********************************************************************** */
 /*                                                                        */
