@@ -1,11 +1,10 @@
 //
-//  Ponto.h
+//  Ponto.hpp
 //  OpenGLTest
 //
 //  Created by Márcio Sarroglia Pinho on 18/08/20.
 //  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
 //
-
 #ifndef Ponto_hpp
 #define Ponto_hpp
 

@@ -7,9 +7,8 @@
 //
 #include <fstream>
 #include <iostream>
+#include "../include/Poligono.hpp"
 using namespace std;
-
-#include "../include/Poligono.h"
 
 Poligono::Poligono() {
 }
@@ -23,6 +22,7 @@ void Poligono::insereVertice(Ponto p, int pos) {
         cout << "Metodo " << __FUNCTION__ << ". Posicao Invalida. Vertice nao inserido." << endl;
         return;
     }
+
     Vertices.insert(Vertices.begin() + pos, p);
 }
 
@@ -75,28 +75,26 @@ void Poligono::obtemLimites(Ponto &Min, Ponto &Max) {
 void Poligono::LePoligono(const char *nome, bool is3D) {
     ifstream input;             // ofstream arq;
     input.open(nome, ios::in);  // arq.open(nome, ios::out);
+    
     if (!input) {
         cout << "Erro ao abrir " << nome << ". " << endl;
         exit(0);
     }
     cout << "Lendo arquivo " << nome << "...";
     string S;
-    // int nLinha = 0;
     unsigned int qtdVertices;
 
-    input >> qtdVertices;  // arq << qtdVertices
-
+    input >> qtdVertices;
     for (int i = 0; i < qtdVertices; i++) {
         double x, y, z;
         // Le cada elemento da linha
-        input >> x >> y;  // arq << x  << " " << y << endl
+        input >> x >> y; 
         if (is3D)
             input >> z;
         else
             z = 0;
         if (!input)
             break;
-        // nLinha++;
         insereVertice(Ponto(x, y, z));
     }
     cout << "Poligono lido com sucesso!" << endl;

@@ -5,18 +5,11 @@
 //  Created by Márcio Sarroglia Pinho on 18/08/20.
 //  Copyright © 2020 Márcio Sarroglia Pinho. All rights reserved.
 //
-
 #ifndef Poligono_hpp
 #define Poligono_hpp
 
 #include <iostream>
 using namespace std;
-
-
-#ifdef WIN32
-#include <windows.h>
-#include <glut.h>
-#endif
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -26,7 +19,7 @@ using namespace std;
 #include <GL/glut.h>
 #endif
 
-#include "Ponto.h"
+#include "Ponto.hpp"
 #include <vector>
 
 class Poligono
