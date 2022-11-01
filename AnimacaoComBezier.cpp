@@ -183,13 +183,13 @@ void CriaPersonagens() {
     for (size_t i = 0; i < nCurvas; i++) {
         indiceCurvas.push_back(i);
     }
-    // Cria um geador unifrome de bits para embaralhar o vetor
+    // Cria um geador uniforme de bits para embaralhar o vetor
     random_device rd;
     mt19937 g(rd());
     shuffle(indiceCurvas.begin(), indiceCurvas.end(), g);
 
     // Cada personagem comeca em uma curva aleatoria, escolhida do vetor embaralhado
-    //  na posicao equivalente a sua, para que nao haja dois personagens na mesma curva
+    //  no indice equivalente ao seu, para que nao haja dois personagens na mesma curva
     for (size_t i = 0; i < nInstancias; i++) {
         int id = indiceCurvas[i];
         // Metade dos personagens comeca com a direcao 1 e outros com -1
