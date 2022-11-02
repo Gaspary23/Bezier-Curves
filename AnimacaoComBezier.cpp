@@ -27,7 +27,7 @@ map<int, vector<tuple<int, int>>> mapa;
 const unsigned int nInstancias = 11;
 InstanciaBZ Personagens[nInstancias];
 // Velocidade dos personagens
-float velocidade = 3;
+float velocidade = 2;
 // Controle do movimento do jogador
 bool movimentaPrincipal = true;
 

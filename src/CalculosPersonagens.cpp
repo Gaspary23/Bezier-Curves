@@ -54,7 +54,8 @@ void CriaEnvelope(Poligono *envelope, int id, InstanciaBZ *Personagens) {
     envelope->insereVertice(Ponto(esquerda, cima, 0));
 }
 // **********************************************************************
-//  int EscolheProxCurva(int i, int shift, InstanciaBZ *Personagens, Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa)
+//  int EscolheProxCurva(int i, int shift, InstanciaBZ *Personagens, 
+//      Poligono CurvasDeControle, map<int, vector<tuple<int, int>>> mapa)
 //      Escolhe a proxima curva que o personagem de indice i deve seguir
 //       shift: 0 -> curva aleatoria dentre as conectadas ao ponto de chegada
 //       shift: 1 -> proxima curva no vetor de curvas conectadas ao ponto de chegada
@@ -122,7 +123,10 @@ int EscolheProxCurva(
     return get<0>(curvas[new_id]);
 }
 // **********************************************************************
-//  void MovimentaPersonagens(float tempoDecorrido)
+//  void MovimentaPersonagens(
+//    float tempoDecorrido, int nInstancias, InstanciaBZ *Personagens, Poligono CurvasDeControle,
+//    Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa, bool movimentaPrincipal
+//    )
 //      Esta funcao atualiza a posicao de todos os personagens do jogo
 // **********************************************************************
 void MovimentaPersonagens(
@@ -148,7 +152,8 @@ void MovimentaPersonagens(
     }
 }
 // **********************************************************************
-//  void MudaCurva(int i, InstanciaBZ *Personagens, Poligono CurvasDeControle, Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa)
+//  void MudaCurva(int i, InstanciaBZ *Personagens, Poligono CurvasDeControle, 
+//      Bezier *Curvas, map<int, vector<tuple<int, int>>> mapa)
 //      Muda a curva em que o personagem de indice i se encontra pela
 //          proxima curva que foi escolhida
 // **********************************************************************
